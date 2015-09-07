@@ -11,8 +11,7 @@
     "path": "^0.11.14",
     "shelljs": "^0.5.3",
     "string_decoder": "^0.10.31",
-    "through2": "^2.0.0", 
-    "hbsp": "git+https://git@github.com/BriteSnow/node-hbsp.git"
+    "through2": "^2.0.0"
   },
   "devDependencies": {
     "chai": "^3.2.0",

@@ -1,10 +1,7 @@
-var hbsp = require("hbsp");
 var _db = require("./db.js");
 
 
 module.exports = {
-	// hbsp
-	hbsp: hbsp, 
 	
 	// db related utils
 	psql: _db.psql,
