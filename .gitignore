@@ -1,0 +1,11 @@
+# Mac stuff, ignore
+.DS_Store
+
+# Ignore test/test-out
+test/test-out
+
+node_modules/
+
+# Ignore sublime text files
+*.sublime-project
+*.sublime-workspace
