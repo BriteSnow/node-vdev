@@ -23,7 +23,7 @@ function psql(user, pwd, db, filePaths){
 	var filePath;
 	for (var i = 0; i < filePaths.length; i++){
 		filePath = filePaths[i];
-		var cmd = ["psql","-U",user,db,"-f", filePath].join(" ");
+		var cmd = ["psql","-U",user,"-d",db,"-f", filePath].join(" ");
 		console.log("will execute >> " + cmd);
 		shell.exec(cmd);
 	}
