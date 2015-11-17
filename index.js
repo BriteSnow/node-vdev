@@ -1,5 +1,7 @@
 var _db = require("./db.js");
-
+var _jetty = require("./jetty.js");
+var _drop = require('./drop.js');
+var _git = require('./git.js');
 
 module.exports = {
 	
@@ -7,6 +9,20 @@ module.exports = {
 	psql: _db.psql,
 	listSqlFiles: _db.listSqlFiles,
 	listNumberedFiles: _db.listNumberedFiles,
+
+	// server related utils
+	setupServer: _jetty.setupServer,
+	startJetty: _jetty.startJetty,
+	downloadWebapp: _jetty.downloadWebapp, 
+
+	// drop utils
+	getVarStringValue: _drop.getVarStringValue, 
+	saveVarStringValue: _drop.saveVarStringValue, 
+	incDropVersion: _drop.incDropVersion,
+
+	// git 
+	gitClone: _git.gitClone,
+	gitCurrentBranch: _git.gitCurrentBranch,
 
 	execCmd: execCmd
 	// gitUpdate: gitUpdate,
@@ -17,6 +33,8 @@ module.exports = {
 
 
 // --------- Cmd Routing --------- //
+
+// route the exec command to one of the method in the cmds. 
 function execCmd(cmds){
 	var cmd = (process.argv.length >= 3)? process.argv[2] : null;
 

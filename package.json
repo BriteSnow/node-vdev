@@ -1,42 +1,34 @@
 {
-	"name": "vdev",
-	"version": "0.1.1",
-	"description": "Some devops utilities for high velocity development and deployment of Java & HTML5 based Cloud applications.",  
-	"author": "Jeremy Chone <jeremy.chone@gmail.com>",
-
-	"main": "index.js",
-
+  "name": "vdev",
+  "version": "0.1.2-SNAPSHOT",
+  "description": "Some devops utilities for high velocity development and deployment of Java & HTML5 based Cloud applications.",
+  "author": "Jeremy Chone <jeremy.chone@gmail.com>",
+  "main": "index.js",
   "repository": {
     "type": "git",
     "url": "git://github.com/BriteSnow/node-vdev.git"
   },
-
-	"dependencies": {
-		"extend": "^3.0.0",
-		"fs": "0.0.2",
-		"gulp-util": "^3.0.6",
-		"path": "^0.11.14",
-		"shelljs": "^0.5.3",
-		"string_decoder": "^0.10.31",
-		"through2": "^2.0.0"
-	},
-
-	"devDependencies": {
-		"chai": "^3.2.0",
-		"gulp": "^3.9.0",
-		"mocha": "^2.3.0"
-	},
-
-	"scripts": {
-		"test": "./node_modules/.bin/mocha",
-		"cmd": "node cmd"
-	},
-	
-	"author": "Jeremy Chone <jeremy.chone@gmail.com>",
-	"license": "MIT", 
-
+  "dependencies": {
+    "extend": "^3.0.0",
+    "fs-extra": "^0.24.0",
+    "gulp-util": "^3.0.6",
+    "path": "^0.11.14",
+    "shelljs": "^0.5.3",
+    "string_decoder": "^0.10.31",
+    "through2": "^2.0.0"
+  },
+  "devDependencies": {
+    "chai": "^3.2.0",
+    "gulp": "^3.9.0",
+    "mocha": "^2.3.0"
+  },
+  "scripts": {
+    "test": "./node_modules/.bin/mocha",
+    "testg": "./node_modules/.bin/mocha -g",
+    "cmd": "node cmd"
+  },
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/BriteSnow/node-vdev/issues"
-  }  	
-
+  }
 }
