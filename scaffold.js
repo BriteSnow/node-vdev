@@ -8,9 +8,10 @@ module.exports = {
 	init: init
 };
 
-//var projectmvcOrigin = "https://github.com/BriteSnow/projectmvc.git";
+var projectmvcOrigin = "https://github.com/BriteSnow/projectmvc.git";
 
-var projectmvcOrigin = "/Users/jeremychone/_jeremy/_projects/projectmvc/projectmvc_mvnsrc";
+// For development
+//var projectmvcOrigin = "/Users/jeremychone/_jeremy/_projects/projectmvc/projectmvc_mvnsrc";
 
 
 function init(baseDir, basePackage, appName){
