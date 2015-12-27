@@ -5,9 +5,11 @@ var fs = require("fs-extra");
 var extend = require("extend");
 var shell = require("shelljs");
 
-
 module.exports = {
 	psql: psql,
+	psqlImport: psqlImport,
+	psqlExport: psqlExport,
+
 	listSqlFiles: listSqlFiles,
 	listNumberedFiles: listNumberedFiles
 };
@@ -15,7 +17,9 @@ module.exports = {
 
 // --------- psql --------- //
 
+
 function psql(user, pwd, db, filePaths){
+	console.log("vdev.psql DEPRECATED. use vdev.pgExec(pgOpts,filePaths)");
 
 	if (typeof filePaths === "string"){
 		filePaths = [filePaths];
@@ -30,6 +34,69 @@ function psql(user, pwd, db, filePaths){
 	//console.log("DONE execute >> ", ex);
 }
 
+// NOTE: for now, ignore pgOpts.pwd
+function psqlImport(pgOpts, filePaths){
+	if (typeof filePaths === "string"){
+		filePaths = [filePaths];
+	}
+	var baseArgs = pgArgs(pgOpts);
+	
+	// TODO: add the password env var.
+
+	var filePath, args;
+	for (var i = 0; i < filePaths.length; i++){
+		filePath = filePaths[i];
+		args = ["psql"].concat(baseArgs);
+		args.push("-f",filePath);
+		var cmd = args.join(" ");
+		console.log("will execute >> " + cmd);
+		shell.exec(cmd);
+	}	
+}
+
+// pgdump with no-owner, no-acl
+function psqlExport(pgOpts, filepath){
+	var defaultArgs = ["--no-owner","--no-acl"];
+	var baseArgs = pgArgs(pgOpts);
+
+	var args = [];
+
+	args = ["pg_dump"].concat(defaultArgs).concat(baseArgs);
+	args.push(">",filepath);
+
+	setPgPwd(args, pgOpts);
+	var cmd = args.join(" ");
+	console.log("will execute >> " + cmd);
+	shell.exec(cmd);
+}
+
+// private: Set the password (for now, add the "PGPASSWORD" env variable)
+function setPgPwd(args, pgOpts){
+	// FIXME: this will not work on windows.
+	if (pgOpts.pwd){
+		args.unshift('PGPASSWORD="' + pgOpts.pwd + '"');
+	}
+}
+
+// private: Build a cmd line argument list from a pgOpts {user, db[, pwd][, host][, port: 5432]} and make it an command line arguments
+function pgArgs(pgOpts){
+	var cmdArgs = [];
+
+	if (pgOpts.user){
+		cmdArgs.push("-U", pgOpts.user);
+	}
+	if (pgOpts.db){
+		cmdArgs.push("-d", pgOpts.db);
+	}
+	if (pgOpts.host){
+		cmdArgs.push("-h", pgOpts.host);	
+	}
+	if (pgOpts.port){
+		cmdArgs.push("-p", pgOpts.port);	
+	}
+
+	return cmdArgs;
+}
 // --------- /psql --------- //
 
 // --------- listSqlFiles --------- //
@@ -72,8 +139,7 @@ function listNumberedFiles(basePath, options){
 		}
 
 		// match if it starts with a number
-		var match = opts.numRegExp.exec(name);
-		
+		var match = opts.numRegExp.exec(name);		
 
 		var num;
 		// first check that we start with a number

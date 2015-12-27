@@ -20,8 +20,5 @@ var cmds = {
 
 };
 
-
 // call the right command from the process.argv within this list of cmds functions
 vdev.execCmd(cmds);
-
-

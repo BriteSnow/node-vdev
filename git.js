@@ -3,22 +3,38 @@ var path = require("path");
 var fs = require("fs-extra");
 
 module.exports = {
-	gitClone: gitClone, 
-	gitCurrentBranch: gitCurrentBranch
+	clone: clone, 
+	currentBranch: currentBranch
 };
 
-function gitCurrentBranch(){
+function currentBranch(){
 	var cmd = ["git","rev-parse","--abbrev-ref","HEAD"];
 	return shell.exec(cmd.join(" ")).output;
 }
 
-function gitClone(dir, origin, dest){
+function clone(dir, origin, dest){
 	var pwd = shell.pwd();
+
+	// make sure the base directory exist
+	fs.mkdirsSync(dir);
 
 	shell.cd(dir);
 
-	var gitCmd = ["git", "clone", origin, dest].join(" ");
-	shell.exec(gitCmd);
+	// if there is a "dest" param, then, just dot he git clone with this destination path
+	if (dest && (dest !== "./" || dest !== ".")){
+			var gitCmd = ["git", "clone", origin, dest].join(" ");
 
+			shell.exec(gitCmd);
+	}
+	// otherwise, we assume it is in dir and we do the git init/remote-add/fetch/checkout to allow
+	// doing a clone in a non-empty folder
+	else{		
+		shell.exec("git init");
+		shell.exec("git remote add origin " + origin);
+		shell.exec("git fetch");
+		shell.exec("git checkout -t origin/master");
+	}
+
+	// TODO: problably need to put it in the 'finally' of try/catch
 	shell.cd(pwd);	
 }

@@ -2,15 +2,20 @@ var fs = require("fs-extra");
 var path = require("path");
 var vdev = require('../index');
 
-describe('version', function() {
-	var testServerDir = "./test/test-out/test-server";
+describe('jetty-test', function() {
 
-	// clean the jetty folder
-	fs.removeSync(testServerDir);
+	// it('test-server-clone', function(done) {
+	// 	this.timeout(15000);
+	// 	var testServerDir = "./test/test-out/test-server";
 
-	// create the jetty setup
-	vdev.setupServer(testServerDir);
-	vdev.downloadWebapp(testServerDir, "ssh://isonas/store/gits/isonas_war");
+	// 	// clean the jetty folder
+	// 	fs.removeSync(testServerDir);
+
+	// 	// create the jetty setup
+	// 	vdev.setupServer(testServerDir);
+	// 	vdev.downloadWebapp(testServerDir, "TODO: need to put github origin of a war");
+	// 	done();
+	// });
 
 });
 

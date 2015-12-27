@@ -4,8 +4,8 @@ var fs = require("fs-extra");
 var git = require("./git.js");
 
 module.exports = {
-	setupServer: setupServer,
-	startJetty: startJetty,
+	setup: setup,
+	start: start,
 	downloadWebapp: downloadWebapp
 };
 
@@ -14,7 +14,7 @@ module.exports = {
  * jettybase/start.ini (port 8080)
  * jettybase/webapps/app_war.xml (which will point to the jettybase/webapps/app_war/ application)
  **/
-function setupServer(serverDir){
+function setup(serverDir){
 	serverDir = getServerDir(serverDir);
 
 	// mkdir jettybaseDir if needed
@@ -28,26 +28,7 @@ function setupServer(serverDir){
 	fs.copySync(srcDir, destDir);
 }
 
-function downloadWebapp(serverDir, gitOrigin){
-	var pwd = shell.pwd();	
-	serverDir = getServerDir(serverDir);
-	jettybaseDir = getJettybaseDir(serverDir);
-
-	// cd to the right folder
-	var webappsDir = path.join(jettybaseDir, "webapps");
-
-	git.gitClone(webappsDir, gitOrigin, "webapp");
-}
-
-// function startJettyAsync(serverDir){
-// 	_startJetty(serverDir,true);
-// }
-
-// function startJetty(serverDir){
-// 	_startJetty(serverDir,false);
-// }
-
-function startJetty(serverDir,async){
+function start(serverDir,async){
 	return new Promise(function(resolve, reject){
 		var pwd = shell.pwd();
 		serverDir = getServerDir(serverDir);
@@ -74,6 +55,24 @@ function startJetty(serverDir,async){
 	});
 }
 
+function downloadWebapp(serverDir, gitOrigin){
+	var pwd = shell.pwd();	
+	serverDir = getServerDir(serverDir);
+	jettybaseDir = getJettybaseDir(serverDir);
+
+	// cd to the right folder
+	var webappsDir = path.join(jettybaseDir, "webapps");
+
+	git.gitClone(webappsDir, gitOrigin, "webapp");
+}
+
+// function startJettyAsync(serverDir){
+// 	_startJetty(serverDir,true);
+// }
+
+// function startJetty(serverDir){
+// 	_startJetty(serverDir,false);
+// }
 
 // --------- utility functions --------- //
 function getServerDir(serverDir){

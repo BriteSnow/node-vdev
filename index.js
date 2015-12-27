@@ -1,28 +1,25 @@
-var _db = require("./db.js");
+var _pg = require("./pg.js");
 var _jetty = require("./jetty.js");
 var _drop = require('./drop.js');
 var _git = require('./git.js');
+var _scaffold = require('./scaffold.js');
 
 module.exports = {
 	
 	// db related utils
-	psql: _db.psql,
-	listSqlFiles: _db.listSqlFiles,
-	listNumberedFiles: _db.listNumberedFiles,
+	pg: _pg,
 
 	// server related utils
-	setupServer: _jetty.setupServer,
-	startJetty: _jetty.startJetty,
-	downloadWebapp: _jetty.downloadWebapp, 
+	jetty: _jetty,
 
 	// drop utils
-	getVarStringValue: _drop.getVarStringValue, 
-	saveVarStringValue: _drop.saveVarStringValue, 
-	incDropVersion: _drop.incDropVersion,
+	drop: _drop,
 
 	// git 
-	gitClone: _git.gitClone,
-	gitCurrentBranch: _git.gitCurrentBranch,
+	git: _git,
+
+	// scaffold
+	scaffold: _scaffold,
 
 	execCmd: execCmd
 	// gitUpdate: gitUpdate,
@@ -37,6 +34,7 @@ module.exports = {
 // route the exec command to one of the method in the cmds. 
 function execCmd(cmds){
 	var cmd = (process.argv.length >= 3)? process.argv[2] : null;
+	var params = (process.argv.length >= 4)? process.argv.slice(3): [];
 
 	if (!cmd){
 		printCmds();
@@ -45,9 +43,9 @@ function execCmd(cmds){
 		if (func){
 			//console.log(" will execute cmd ", cmd);
 			// TODO: probably need to slice the remaining arguments as parameters
-			func.call();
+			func.apply(null,params);
 		}else {
-			console.log("wrong command '" + cmd + "'");
+			console.log("wrong command '" + cmd + "' is not a method");
 			printCmds();
 		}	
 	}
