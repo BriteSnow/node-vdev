@@ -1,6 +1,6 @@
 {
   "name": "vdev",
-  "version": "0.2.0-SNAPSHOT",
+  "version": "0.2.0",
   "description": "Some devops utilities for high velocity development and deployment of Java & HTML5 based Cloud applications.",
   "author": "Jeremy Chone <jeremy.chone@gmail.com>",
   "main": "index.js",
