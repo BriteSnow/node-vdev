@@ -17,6 +17,9 @@ var projectmvcOrigin = "https://github.com/BriteSnow/projectmvc.git";
 function init(baseDir, basePackage, appName){
 	var packageNames = basePackage.split(".");
 
+	if (!appName){
+		appName = packageNames[packageNames.length - 1];
+	}
 	// close projectmvc
 	git.clone(baseDir, projectmvcOrigin);
 
@@ -50,7 +53,9 @@ function init(baseDir, basePackage, appName){
 	// plus all test .java files
 	packageFiles = packageFiles.concat(glob.sync(path.join(baseTestJavaDir,"**/*.java")));
 	// plus snow.properties
-	packageFiles.push(path.join(baseDir,"/src/main/webapp/WEB-INF/snow.properties"));	
+	packageFiles.push(path.join(baseDir,"/src/main/webapp/WEB-INF/snow.properties"));		
+	// plus pom.xml
+	packageFiles.push(path.join(baseDir,"pom.xml"));	
 
 	replaceInFiles(packageFiles, replacePackage);
 	// --------- /replace package --------- //

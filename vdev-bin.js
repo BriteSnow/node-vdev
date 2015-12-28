@@ -7,9 +7,8 @@ var vdev = require("../vdev");
 
 
 var cmds = {
-	scaffold: function(appName,shortName){
-		console.log("appNamaaaae", appName, "shortName", shortName);
-		vdev.scaffold.init("./", "io.briteteam", "briteteam");
+	scaffold: function(basePackage,appName){
+		vdev.scaffold.init("./", basePackage, appName);
 	}
 };
 
