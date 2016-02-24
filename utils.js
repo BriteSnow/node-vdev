@@ -7,7 +7,7 @@ module.exports = {
 	writeJson: writeJson,
 	replaceInFiles: replaceInFiles,
 	ensureArray: ensureArray, 
-	serverUtils: {
+	opsUtils: {
 		getSqlDir: getSqlDir,
 		getWebappsDir: getWebappsDir,
 		getWebappDir: getWebappDir,
