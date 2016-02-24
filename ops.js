@@ -115,7 +115,7 @@ function stopJetty(lenient){
 					fs.removeSync(getProcJsonFile());
 					resolve({exitCode: exitCode, proc: killProc});
 				}else{
-					console.log("Failed kill", exitCode);
+					console.log("Failed kill", exitCode, ". If process does not exist, do 'rm proc.json' to remove the old pid information.");
 					throw {exitCode: exitCode, proc: killProc};
 				}
 			});
