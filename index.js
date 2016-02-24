@@ -5,6 +5,8 @@ var _git = require('./git.js');
 var _scaffold = require('./scaffold.js');
 var _ops = require('./ops.js');
 var _utils = require('./utils.js');
+var _cmds = require('./cmds.js');
+
 
 module.exports = {
 	
@@ -27,6 +29,8 @@ module.exports = {
 	ops: _ops, 
 
 	utils: _utils,
+
+	cmds: _cmds,
 
 	execCmd: execCmd
 
