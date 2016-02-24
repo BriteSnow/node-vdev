@@ -28,6 +28,14 @@ var cmds = {
 		ops.makePostReceive();
 	},
 
+	updateWar: function(){
+		ops.updateWar().then(() => process.exit(0))
+				.catch(err => {
+					console.log("error: ", err);
+					process.exit(1);
+				});
+	}, 
+
 	initDb: function(){	
 		ops.initDb().then(() => process.exit(0))
 				.catch(err => {
