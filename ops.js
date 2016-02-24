@@ -224,7 +224,7 @@ function makePostReceive(){
 								'echo "---------from bash post receive"\n' +
 								'source /home/ec2-user/.bash_profile\n' +
 								'cd ' + serverDir + '\n' +
-								'./node server fullUpdate\n';
+								'node server fullUpdate\n';
 
 	var appRepoDir = opsUtils.getAppRepoDir(config);
 
