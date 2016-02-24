@@ -28,20 +28,29 @@ var cmds = {
 		ops.makePostReceive();
 	},
 
-	initDb: function(){
+	initDb: function(){	
 		ops.initDb().then(() => process.exit(0))
-				.catch(() => process.exit(1));
+				.catch(err => {
+					console.log("error: ", err);
+					process.exit(1);
+				});
 	},
 
 	startJetty: function(){
 		ops.startJetty().then(() => process.exit(0))
-			.catch(() => process.exit(1));
+				.catch(err => {
+					console.log("error: ", err);
+					process.exit(1);
+				});
 
 	}, 
 
 	stopJetty: function(){
 		ops.stopJetty().then(() => process.exit(0))
-			.catch(() => process.exit(1));
+				.catch(err => {
+					console.log("error: ", err);
+					process.exit(1);
+				});
 	},
 	// --------- /Ops ServerDir --------- //
 

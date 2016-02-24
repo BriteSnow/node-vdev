@@ -1,8 +1,11 @@
 var shell = require("shelljs");
 var path = require("path");
 var fs = require("fs-extra");
+var child_process = require("child_process");
+
 var utils = require("./utils.js");
 var git = require("./git.js");
+var pg = require("./pg.js");
 
 var opsUtils = utils.opsUtils;
 
@@ -54,7 +57,7 @@ function makeServer(appName, warOrigin){
 	};
 
 	// create serverDir and save config
-	var serverDir = getServerDir(appName);		
+	var serverDir = getServerDirFromParent(appName);		
 	fs.mkdirsSync(serverDir);
 	var configFile = opsUtils.getAppConfigFile(serverDir);
 	utils.writeJson(configFile, config);
@@ -127,7 +130,7 @@ function stopJetty(lenient){
 
 function startJetty(){
 	var serverDir = getServerDir();
-
+	console.log("serverDir", serverDir);
 	var p = new Promise(function(resolve){
 
 		// check if the proceJsonFile exist, if yes, reject
@@ -143,7 +146,7 @@ function startJetty(){
 
 		// build the command and execute
 		var cmd = ["java", "-jar", get_JETTY_HOME() + "start.jar"].join(" ");	
-		console.log("Will execute >> ", cmd, "on\n\t", jettybaseDir);
+		console.log("Will execute >> ", cmd, "\n\t from dir: ", jettybaseDir);
 		var proc = child_process.spawn("java",["-jar", get_JETTY_HOME() + "start.jar"],{cwd: jettybaseDir});
 
 		function pipeOutput(outputType, data){
@@ -176,7 +179,8 @@ function startJetty(){
 // --------- Public API: Server DB Management --------- //
 // Note: for now, assume localhost:5432 and appname_db & appname_user/welcome
 function initDb(){
-
+	
+	console.log(getServerDir());
 	return new Promise(function(resolve){
 		// Assume the serverDir is the current dir
 		var serverDir = getServerDir();
@@ -191,7 +195,7 @@ function initDb(){
 		var sqlDir = opsUtils.getSqlDir(config, serverDir);
 		
 		// copy the createDb source file to modify the database and user name 
-		var createDbSrcFile = vdev.pg.listSqlFiles(sqlDir, {to: 0})[0];
+		var createDbSrcFile = pg.listSqlFiles(sqlDir, {to: 0})[0];
 		var createDbFile = path.join(serverDir,"00_create-db.sql");
 		fs.copySync(createDbSrcFile,createDbFile);
 
@@ -202,8 +206,8 @@ function initDb(){
 		var replaceDbCred = [{rgx: /\w*_db/ig, val: dbName},{rgx: /\w*_user/ig, val: dbUser}];
 		utils.replaceInFiles(createDbFile, replaceDbCred);
 
-		vdev.pg.psqlImport({user: "postgres", db: "postgres"}, createDbFile);
-		vdev.pg.psqlImport({user: dbUser, db: dbName}, vdev.pg.listSqlFiles(sqlDir, {from: 1}));		
+		pg.psqlImport({user: "postgres", db: "postgres"}, createDbFile);
+		pg.psqlImport({user: dbUser, db: dbName}, pg.listSqlFiles(sqlDir, {from: 1}));		
 
 		resolve();
 	});
@@ -263,7 +267,11 @@ function updateWar(){
 // --------- /Public API: Others --------- //
 
 // --------- private --------- //
-function getServerDir(appName){
+function getServerDir(){
+	return path.resolve("./");
+}
+
+function getServerDirFromParent(appName){
 	return path.resolve("./", appName + "_server");
 }
 
