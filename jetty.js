@@ -29,7 +29,7 @@ function setup(serverDir){
 }
 
 function start(serverDir,async){
-	return new Promise(function(resolve, reject){
+	return new Promise(resolve => {
 		var pwd = shell.pwd();
 		serverDir = getServerDir(serverDir);
 
@@ -56,7 +56,6 @@ function start(serverDir,async){
 }
 
 function downloadWebapp(serverDir, gitOrigin){
-	var pwd = shell.pwd();	
 	serverDir = getServerDir(serverDir);
 	jettybaseDir = getJettybaseDir(serverDir);
 

@@ -3,6 +3,8 @@ var _jetty = require("./jetty.js");
 var _drop = require('./drop.js');
 var _git = require('./git.js');
 var _scaffold = require('./scaffold.js');
+var _ops = require('./ops.js');
+var _utils = require('./utils.js');
 
 module.exports = {
 	
@@ -21,11 +23,13 @@ module.exports = {
 	// scaffold
 	scaffold: _scaffold,
 
+	// ops
+	ops: _ops, 
+
+	utils: _utils,
+
 	execCmd: execCmd
-	// gitUpdate: gitUpdate,
-	// shutdownJetty: shutdownJetty,
-	// startJetty: startJetty, 
-	// readFirstLine: readFirstLine
+
 };
 
 

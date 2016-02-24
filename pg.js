@@ -1,6 +1,4 @@
 var path = require("path");
-var through = require("through2");
-var StringDecoder = require('string_decoder').StringDecoder;
 var fs = require("fs-extra");
 var extend = require("extend");
 var shell = require("shelljs");
