@@ -15,7 +15,7 @@ var cmds = {
 
 	// --------- Ops Server ParentDir --------- //
 	makeServer: function(appName, warOrigin){
-		ops.makeServer(appNamem, warOrigin);
+		ops.makeServer(appName, warOrigin);
 	}, 
 
 	makeWarRepo: function(appName){
