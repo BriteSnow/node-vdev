@@ -56,8 +56,16 @@ function makeServer(appName, warOrigin){
 		warOrigin: warOrigin
 	};
 
-	// create serverDir and save config
+	// build serverDir
 	var serverDir = getServerDirFromParent(appName);		
+
+	// if the serverDir already exist, do nothing, assume it is already setup. 
+	if (utils.exists(serverDir)){
+		console.log(`Serverdir "${serverDir}" already exist. Nothing to be done. To remake the server, remove this dir beforehand.`);
+		return;
+	}
+
+	// create serverDir
 	fs.mkdirsSync(serverDir);
 	var configFile = opsUtils.getAppConfigFile(serverDir);
 	utils.writeJson(configFile, config);
