@@ -27,19 +27,19 @@ module.exports = {
 
 // --------- Public API: Server Making --------- //
 function makeWarRepo(appName){		
-	var appDir = opsUtils.getAppRepoDir(appName);
+	var warDir = opsUtils.getWarRepoDir(appName);
 	
-	if (utils.exists(appDir)){
-		console.log(appDir + " already exists, assuming it is already setup correctly.");
+	if (utils.exists(warDir)){
+		console.log(warDir + " already exists, assuming it is already setup correctly.");
 		return;
 	}
 	
 	// create the folder
-	fs.mkdirsSync(appDir);
+	fs.mkdirsSync(warDir);
 
 	// execute the git init
 	var pwd = shell.pwd();
-	shell.cd(appDir);
+	shell.cd(warDir);
 	shell.exec("git init --bar");
 	shell.cd(pwd);
 }
@@ -65,6 +65,7 @@ function makeServer(appName, warOrigin){
 	// clone the template
 	git.clone(serverDir,opsServerOrigin);
 	fs.removeSync(path.join(serverDir,".git/"));
+	fs.removeSync(path.join(serverDir,".gitignore"));
 
 	// replace command for APPNAME template variable
 	var replaceAppname = {rgx: /APPNAME/ig, val: config.appName};

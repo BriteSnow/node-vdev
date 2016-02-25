@@ -12,7 +12,7 @@ module.exports = {
 		getWebappsDir: getWebappsDir,
 		getWebappDir: getWebappDir,
 		getWebappPropFile: getWebappPropFile,
-		getAppRepoDir: getAppRepoDir,
+		getWarRepoDir: getWarRepoDir,
 		readAppConfig: readAppConfig,
 		getAppConfigFile: getAppConfigFile, 
 		getJettybaseDir: getJettybaseDir
@@ -37,9 +37,9 @@ function getWebappPropFile(config, serverDir){
 	return path.join(webappsDir, config.appName + "_war.properties");
 }
 
-function getAppRepoDir(config){
+function getWarRepoDir(appName){
 	// for now, the app repos base is /store/gits/
-	return path.resolve("/store/gits/", config.appName + "_war");
+	return path.resolve("/store/gits/", appName + "_war");
 }
 
 function readAppConfig(serverDir){
@@ -105,5 +105,3 @@ function ensureArray(val){
 	return Array.isArray(val)?val:[val];
 }
 // --------- /Lang Utils --------- //
-
-
