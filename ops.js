@@ -235,7 +235,7 @@ function makePostReceive(){
 								'cd ' + serverDir + '\n' +
 								'node server fullUpdate\n';
 
-	var appRepoDir = opsUtils.getAppRepoDir(config);
+	var appRepoDir = opsUtils.getWarRepoDir(config.appName);
 
 	// check if the directory exist
 	if (!utils.exists(appRepoDir)){
