@@ -1,5 +1,3 @@
-var vdev = require('./index');
-var shell = require("shelljs");
 var path = require("path");
 var fs = require("fs-extra");
 
@@ -12,7 +10,7 @@ module.exports = {
 // will increment the last number of a string (with '-' seperator convension) and preserving padding
 function incDropVersion(version){
 	var match = version.match(/-(\d+)$/);
-	var v, n, nextV;
+	var v, n;
 	if (match){
 		v = match[1];
 		n = parseInt(v);
@@ -49,8 +47,8 @@ function saveVarStringValue(filePath, varName, value){
 
 // --------- utility functions --------- //
 function zeroPad(num, places) {
-  var zero = places - num.toString().length + 1;
-  return Array(+(zero > 0 && zero)).join("0") + num;
+	var zero = places - num.toString().length + 1;
+	return Array(+(zero > 0 && zero)).join("0") + num;
 }
 // --------- /utility functions --------- //
 

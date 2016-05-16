@@ -1,5 +1,4 @@
 var shell = require("shelljs");
-var path = require("path");
 var fs = require("fs-extra");
 
 module.exports = {
@@ -22,9 +21,9 @@ function clone(dir, origin, dest){
 
 	// if there is a "dest" param, then, just dot he git clone with this destination path
 	if (dest && (dest !== "./" || dest !== ".")){
-			var gitCmd = ["git", "clone", origin, dest].join(" ");
+		var gitCmd = ["git", "clone", origin, dest].join(" ");
 
-			shell.exec(gitCmd);
+		shell.exec(gitCmd);
 	}
 	// otherwise, we assume it is in dir and we do the git init/remote-add/fetch/checkout to allow
 	// doing a clone in a non-empty folder
