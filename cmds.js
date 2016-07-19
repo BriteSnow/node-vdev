@@ -1,9 +1,9 @@
 var ops = require("./ops.js");
+var _scaffold = require("./scaffold.js");
 
 //////
 // This module is made to be function called for command lines with vdev ... (and can be extended from custom scripts, like local server.js)
 //////
-
 
 module.exports = {
 	scaffold: scaffold, 
@@ -18,7 +18,7 @@ module.exports = {
 
 
 function scaffold(basePackage,appName){
-	vdev.scaffold.init("./", basePackage, appName);
+	_scaffold.init("./", basePackage, appName);
 }
 
 // --------- Ops Server ParentDir --------- //

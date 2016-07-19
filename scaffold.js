@@ -69,8 +69,8 @@ function init(baseDir, basePackage, appName){
 											// web files
 											path.join(baseDir,"/src/main/webapp/_frame.ftl"),
 											path.join(baseDir,"/src/main/webapp/loginpage.ftl"),
-											path.join(baseDir,"/src/main/webapp/tmpl/MainView.tmpl"),
-											path.join(baseDir,"/src/main/webapp/sysadmin/tmpl/AdminView.tmpl"),
+											path.join(baseDir,"/src/main/webapp/src/view/MainView.tmpl"),
+											path.join(baseDir,"/src/main/webapp/sysadmin/src/view/AdminView.tmpl"),
 											// nodejs files
 											path.join(baseDir,"gulpfile.js"),
 											path.join(baseDir,"package.json")];
