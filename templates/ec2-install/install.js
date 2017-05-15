@@ -30,7 +30,7 @@ async function all(){
 
 	await addToFile("ADD JAVA ENV TO .bash_profile", "/home/ec2-user/.bash_profile",
 		["export JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF-8",
-			`export JAVA_HOME=/usr/java/jdk1.8.0_${javaVersion}}/`]);
+			`export JAVA_HOME=/usr/java/jdk1.8.0_${javaVersion}/`]);
 
 	var jettyVersion = "9.4.5.v20170502";
 	var jettyName = `jetty-distribution-${jettyVersion}`;
