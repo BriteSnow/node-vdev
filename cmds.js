@@ -6,31 +6,38 @@ var _scaffold = require("./scaffold.js");
 //////
 
 module.exports = {
+	setupEc2Install, 
 	scaffold, makeServer, makeWarRepo, makePostReceive,
 	updateWar, initDb, startJetty, stopJetty
 };
 
 
-function scaffold(basePackage,appName){
-	return _scaffold.init("./", basePackage, appName);
+
+async function setupEc2Install(dir){
+	return await ops.setupEc2Install(dir);
+}
+
+
+async function scaffold(basePackage, appName){
+	return await _scaffold.init("./", basePackage, appName);
 }
 
 // --------- Ops Server ParentDir --------- //
-function makeServer(appName, warOrigin){
-	return ops.makeServer(appName, warOrigin);
-} 
+async function makeServer(parentServerDir, appName, warOrigin){
+	await ops.makeServer(parentServerDir, appName, warOrigin);
+}
 
-function makeWarRepo(appName){
-	return ops.makeWarRepo(appName);
+async function makeWarRepo(parentRepoDir, baseRepoName){
+	await ops.makeWarRepo(parentRepoDir, baseRepoName);
 } 
 // --------- /Ops Server ParentDir --------- //
 
 // --------- Ops ServerDir --------- //
-function makePostReceive(){
-	ops.makePostReceive();
+async function makePostReceive(serverDir){
+	ops.makePostReceive(serverDir);
 }
 
-function updateWar(){
+async function updateWar(serverDir){
 	ops.updateWar().then(() => process.exit(0))
 			.catch(err => {
 				console.log("error: ", err);
@@ -38,7 +45,7 @@ function updateWar(){
 			});
 }
 
-function initDb(){	
+async function initDb(serverDir){	
 	ops.initDb().then(() => process.exit(0))
 			.catch(err => {
 				console.log("error: ", err);
@@ -46,8 +53,8 @@ function initDb(){
 			});
 }
 
-function startJetty(){
-	return ops.startJetty().then(() => process.exit(0))
+async function startJetty(serverDir){
+	return ops.startJetty(serverDir).then(() => process.exit(0))
 			.catch(err => {
 				console.log("error: ", err);
 				process.exit(1);
@@ -55,8 +62,8 @@ function startJetty(){
 
 }
 
-function stopJetty(){
-	return ops.stopJetty().then(() => process.exit(0))
+async function stopJetty(serverDir){
+	return ops.stopJetty(serverDir).then(() => process.exit(0))
 			.catch(err => {
 				console.log("error: ", err);
 				process.exit(1);

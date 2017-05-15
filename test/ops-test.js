@@ -10,9 +10,15 @@ const srcWarDir = "/Users/jeremychone/_jeremy/_projects/projectmvc/war";
 const outDir = "./test/test-out/ops-test";
 const serverDir = path.join(outDir, "pmvc_app_server");
 
-var _warRepoDir = "/store/gits/test_pmvc_war";
+var _warRepoParentDir = "/store/gits/";
+
+var _warRepoDir = path.join(_warRepoParentDir, "test_pmvc_war");
 
 describe("ops-test", function() {
+
+	it("ops-test-setupEc2Install", async function(){
+		await ops.setupEc2Install(path.join(outDir, "ec2-install"));
+	});
 
 	it("ops-test-makeWarRepo", async function(){
 
@@ -25,7 +31,7 @@ describe("ops-test", function() {
 		}
 
 
-		var warRepoDir = await ops.makeWarRepo("test_pmvc");
+		var warRepoDir = await ops.makeWarRepo(_warRepoParentDir, "test_pmvc");
 		assert.equal(warRepoDir, _warRepoDir);
 
 		// reset the target test repo (ingoreFail: true so that we do not get the exists errors)

@@ -29,9 +29,11 @@ function webappPropFile(serverDir, config){
 	return path.join(wappsDir, config.appName + "_war.properties");
 }
 
-function warRepoDir(appName){
-	// for now, the app repos base is /store/gits/
-	return path.resolve("/store/gits/", appName + "_war");
+function warRepoDir(parentDir, repoBaseName){
+	if (parentDir == null || repoBaseName == null){
+		throw new Error(`warRepoDir needs a parentDir and repoBaseName, right now got ${parentDir} and ${repoBaseName}`);
+	}
+	return path.resolve(parentDir, repoBaseName + "_war");
 }
 
 function appConfigFile(serverDir){

@@ -15,6 +15,8 @@ var opsVals = require("./ops-vals.js");
 var templatesDir = path.join(__dirname, "templates");
 
 module.exports = {
+	setupEc2Install, 
+
 	makeWarRepo,
 
 	// from parent of serverDir
@@ -28,9 +30,16 @@ module.exports = {
 	makePostReceive	
 };
 
+
+async function setupEc2Install(dir){
+	dir = dir || "./install";
+	await fs.mkdirs(dir);
+	await fs.copy("./templates/ec2-install", dir);
+}
+
 // --------- Public API: Server Making --------- //
-async function makeWarRepo(appName){		
-	var warRepoDir = opsVals.warRepoDir(appName);
+async function makeWarRepo(parentDir, baseRepoName){
+	var warRepoDir = opsVals.warRepoDir(parentDir, baseRepoName);
 	
 	if (fs.pathExistsSync(warRepoDir)){
 		console.log(warRepoDir + " already exists, assuming it is already setup correctly.");
@@ -47,9 +56,8 @@ async function makeWarRepo(appName){
 }
 
 async function makeServer(parentDir, appName, warOrigin){
-	// assert params
-	if (!warOrigin){
-		throw "need a git origin for the war folder";
+	if (arguments.length < 3){
+		throw new Error(`ops.makeServer requires (parentDir, appName, warOrigin but got only ${arguments}`);
 	}
 
 	// build config
@@ -96,13 +104,15 @@ async function makeServer(parentDir, appName, warOrigin){
 	await fs.mkdirs(webappDir);
 
 	await git.clone(webappDir,config.warOrigin);
+
+	console.log(`\n>>>>>>>> server dir created at: ${serverDir}`);
 }
 // --------- /Public API: Server Making --------- //
 
 // --------- Public API: Server Management --------- //
 
 async function startJetty(serverDir, opts){
-	// if we do not have serverDir, 
+	// if the first param is not string
 	if (typeof serverDir !== "string"){
 		serverDir = "./";
 		opts = serverDir;
