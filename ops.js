@@ -34,7 +34,8 @@ module.exports = {
 async function setupEc2Install(dir){
 	dir = dir || "./install";
 	await fs.mkdirs(dir);
-	await fs.copy("./templates/ec2-install", dir);
+	var templateInstallDir = path.join(templatesDir, "ec2-install");
+	await fs.copy(templateInstallDir, dir);
 }
 
 // --------- Public API: Server Making --------- //

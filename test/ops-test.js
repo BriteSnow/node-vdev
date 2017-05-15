@@ -17,7 +17,7 @@ var _warRepoDir = path.join(_warRepoParentDir, "test_pmvc_war");
 describe("ops-test", function() {
 
 	it("ops-test-setupEc2Install", async function(){
-		await ops.setupEc2Install(path.join(outDir, "ec2-install"));
+		await ops.setupEc2Install(path.join(outDir, "ec2-install-example"));
 	});
 
 	it("ops-test-makeWarRepo", async function(){
