@@ -1,11 +1,9 @@
-var shell = require("shelljs");
 var path = require("path");
-var fs = require("fs-extra");
+var fs = require("fs-extra-plus");
 var git = require("./git.js");
-var glob = require("glob");
 
 module.exports = {
-	init: init
+	init
 };
 
 var projectmvcOrigin = "https://github.com/BriteSnow/projectmvc.git";
@@ -14,7 +12,7 @@ var projectmvcOrigin = "https://github.com/BriteSnow/projectmvc.git";
 //var projectmvcOrigin = "/Users/jeremychone/_jeremy/_projects/projectmvc/projectmvc_mvnsrc";
 
 
-function init(baseDir, basePackage, appName){
+async function init(baseDir, basePackage, appName){
 	var packageNames = basePackage.split(".");
 
 	if (!appName){
@@ -83,20 +81,19 @@ function init(baseDir, basePackage, appName){
 
 // --------- Private Utilities --------- //
 
-function replaceInFiles(files, replaceCmds){
+async function replaceInFiles(files, replaceCmds){
 	files  = makeArray(files);	
 	replaceCmds = makeArray(replaceCmds);
 
-	var i, j, file, content, replaceCmd;
 		
-	for (i = 0; i < files.length; i++){
-		file = files[i];
-		content = fs.readFileSync(file, 'utf8');
-		for (j = 0; j < replaceCmds.length; j++){
-			replaceCmd = replaceCmds[j];
+	for (let i = 0; i < files.length; i++){
+		let file = files[i];
+		let content = await fs.readFileSync(file, 'utf8');
+		for (let j = 0; j < replaceCmds.length; j++){
+			let replaceCmd = replaceCmds[j];
 			content = content.replace(replaceCmd.rgx,replaceCmd.val);	
 		}		
-		fs.writeFileSync(file, content, 'utf8');		
+		await fs.writeFile(file, content, 'utf8');		
 	}		
 }
 

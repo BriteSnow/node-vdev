@@ -1,5 +1,4 @@
 var _pg = require("./pg.js");
-var _jetty = require("./jetty.js");
 var _drop = require('./drop.js');
 var _git = require('./git.js');
 var _scaffold = require('./scaffold.js');
@@ -12,9 +11,6 @@ module.exports = {
 	
 	// db related utils
 	pg: _pg,
-
-	// server related utils
-	jetty: _jetty,
 
 	// drop utils
 	drop: _drop,

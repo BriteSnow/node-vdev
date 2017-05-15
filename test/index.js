@@ -1,4 +1,3 @@
-var gulp = require("gulp");
 var vdev = require('../index');
 var chai = require('chai');
 var assert = chai.assert;

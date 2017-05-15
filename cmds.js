@@ -6,28 +6,22 @@ var _scaffold = require("./scaffold.js");
 //////
 
 module.exports = {
-	scaffold: scaffold, 
-	makeServer: makeServer, 
-	makeWarRepo: makeWarRepo,
-	makePostReceive: makePostReceive,
-	updateWar: updateWar,
-	initDb: initDb,
-	startJetty: startJetty,
-	stopJetty: stopJetty
+	scaffold, makeServer, makeWarRepo, makePostReceive,
+	updateWar, initDb, startJetty, stopJetty
 };
 
 
 function scaffold(basePackage,appName){
-	_scaffold.init("./", basePackage, appName);
+	return _scaffold.init("./", basePackage, appName);
 }
 
 // --------- Ops Server ParentDir --------- //
 function makeServer(appName, warOrigin){
-	ops.makeServer(appName, warOrigin);
+	return ops.makeServer(appName, warOrigin);
 } 
 
 function makeWarRepo(appName){
-	ops.makeWarRepo(appName);
+	return ops.makeWarRepo(appName);
 } 
 // --------- /Ops Server ParentDir --------- //
 
@@ -53,7 +47,7 @@ function initDb(){
 }
 
 function startJetty(){
-	ops.startJetty().then(() => process.exit(0))
+	return ops.startJetty().then(() => process.exit(0))
 			.catch(err => {
 				console.log("error: ", err);
 				process.exit(1);
@@ -62,7 +56,7 @@ function startJetty(){
 }
 
 function stopJetty(){
-	ops.stopJetty().then(() => process.exit(0))
+	return ops.stopJetty().then(() => process.exit(0))
 			.catch(err => {
 				console.log("error: ", err);
 				process.exit(1);

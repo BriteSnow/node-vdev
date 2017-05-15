@@ -1,39 +1,35 @@
-var shell = require("shelljs");
-var fs = require("fs-extra");
+var spawn = require("p-spawn");
+var fs = require("fs-extra-plus");
 
 module.exports = {
 	clone: clone, 
 	currentBranch: currentBranch
 };
 
-function currentBranch(){
-	var cmd = ["git","rev-parse","--abbrev-ref","HEAD"];
-	return shell.exec(cmd.join(" ")).output;
+async function currentBranch(dir){
+	var args = ["rev-parse","--abbrev-ref","HEAD"];
+	var r = await spawn("git", args, {cwd:dir, capture:["stdout","stderr"]});
+	return r.stdout;
 }
 
-function clone(dir, origin, dest){
-	var pwd = shell.pwd();
+
+async function clone(dir, origin, dest){
 
 	// make sure the base directory exist
-	fs.mkdirsSync(dir);
+	await fs.mkdirs(dir);	
 
-	shell.cd(dir);
-
-	// if there is a "dest" param, then, just dot he git clone with this destination path
+	// if there is a "dest" param, then, just do the git clone with this destination path
 	if (dest && (dest !== "./" || dest !== ".")){
-		var gitCmd = ["git", "clone", origin, dest].join(" ");
-
-		shell.exec(gitCmd);
+		let args = ["clone", origin, dest].join(" ");
+		await spawn("git", args, {cwd: dir});
 	}
 	// otherwise, we assume it is in dir and we do the git init/remote-add/fetch/checkout to allow
 	// doing a clone in a non-empty folder
 	else{		
-		shell.exec("git init");
-		shell.exec("git remote add origin " + origin);
-		shell.exec("git fetch");
-		shell.exec("git checkout -t origin/master");
+		await spawn("git", ["init"],  {cwd: dir});
+		await spawn("git", ["remote", "add", "origin", origin],  {cwd: dir});
+		await spawn("git", ["fetch"],  {cwd: dir});
+		await spawn("git", ["checkout", "-t", "origin/master"],  {cwd: dir});
 	}
 
-	// TODO: problably need to put it in the 'finally' of try/catch
-	shell.cd(pwd);	
 }

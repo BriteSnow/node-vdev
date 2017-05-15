@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-var vdev = require("../vdev");
+const vdev = require("../vdev");
+const router = require("cmdrouter");
 
 // execute the commands defined in bin-cmds
-vdev.execCmd(vdev.cmds);
+router(vdev.cmds).route();

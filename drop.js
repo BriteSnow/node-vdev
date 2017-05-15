@@ -1,5 +1,5 @@
 var path = require("path");
-var fs = require("fs-extra");
+var fs = require("fs-extra-plus");
 
 module.exports = {
 	getVarStringValue: getVarStringValue, 
@@ -23,7 +23,7 @@ function incDropVersion(version){
 
 // Will get the string value for the first variable name varName. 
 // Note: simple regex matching base on matching varName = ""
-function getVarStringValue(filePath, varName){
+async function getVarStringValue(filePath, varName){
 	filePath = path.resolve(filePath);
 	var content = fs.readFileSync(filePath, 'utf8');
 	var rx = new RegExp(varName + '\\s*=\\s*"(.*)"', 'i');
