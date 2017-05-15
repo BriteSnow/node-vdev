@@ -9,12 +9,9 @@
     "url": "git://github.com/BriteSnow/node-vdev.git"
   },
   "dependencies": {
-    "extend": "^3.0.0",
+    "cmdrouter": "^0.1.0",
     "fs-extra-plus": "^0.1.0",
-    "glob": "^7.0.3",
     "p-spawn": "^0.2.0",
-    "path": "^0.12.7",
-    "shelljs": "^0.7.0",
     "string_decoder": "^0.11.10",
     "through2": "^2.0.1"
   },
