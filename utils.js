@@ -1,13 +1,20 @@
 var fs = require("fs-extra-plus");
+var strip = require("strip-json-comments");
 
 module.exports = {
-	ensureArray, replaceInFiles
+	ensureArray, replaceInFiles, readJson
 };
 
 
-
-
 // --------- File Utils --------- //
+// readJon but also support comments
+async function readJson(file){
+	var content = await fs.readFile(file,"utf-8");
+	content = strip(content);
+	return JSON.parse(content);
+}
+
+
 async function replaceInFiles(files, replaceCmds){
 	files  = ensureArray(files);	
 	replaceCmds = ensureArray(replaceCmds);

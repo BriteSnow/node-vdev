@@ -8,6 +8,7 @@ test/test-out
 
 node_modules/
 npm-debug.log
+package-lock.json
 
 # Ignore sublime text files
 *.sublime-project

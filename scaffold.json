@@ -1,0 +1,13 @@
+{
+
+	// REQUIRED
+	"package": "io.test1", // new package name (java package name)
+	"appName": "test1", // new application name (used for war folder/.war file and database names)
+
+	// OPTIONALS
+	"src": "/Users/jeremychone/_jeremy/_projects/projectmvc/projectmvc_mvnsrc", // optional source git
+	"srcBranch": "next_mvdom",
+	// "srcBranch": "" // optional the branch to start from
+	"dir": "test/test-out/sc-1" // optional output directory. Will be "./" if not defined
+
+}

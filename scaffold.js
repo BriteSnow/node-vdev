@@ -1,77 +1,92 @@
 var path = require("path");
+var spawn = require("p-spawn");
 var fs = require("fs-extra-plus");
 var git = require("./git.js");
 
 module.exports = {
-	init
+	create
 };
 
-var projectmvcOrigin = "https://github.com/BriteSnow/projectmvc.git";
 
-// For development
-//var projectmvcOrigin = "/Users/jeremychone/_jeremy/_projects/projectmvc/projectmvc_mvnsrc";
+var defaultOpts = {
+	src: "https://github.com/BriteSnow/projectmvc.git",
+	// for dev
+	//src: "/Users/jeremychone/_jeremy/_projects/projectmvc/projectmvc_mvnsrc",
+	dir: "./"
+};
 
+/**
+ - opts
+		- src: default "https://github.com/BriteSnow/projectmvc.git"
+		- dir: default "./"
+		- package: e.g, "io.testapp"
+		- appName: e.g, "testApplication"
+*/
+async function create(opts){
 
-async function init(baseDir, basePackage, appName){
-	var packageNames = basePackage.split(".");
+	opts = Object.assign({}, defaultOpts, opts);
 
-	if (!appName){
-		appName = packageNames[packageNames.length - 1];
-	}
+	var packageNames = opts.package.split(".");
+
 	// close projectmvc
-	git.clone(baseDir, projectmvcOrigin);
+	await git.clone(opts.dir, opts.src);
+
+	// if we have a opts.srcBranch we checkout this one
+	if (opts.srcBranch){
+		await spawn("git", ["checkout", opts.srcBranch],  {cwd: opts.dir});
+	}
 
 	// remove the .git (should not be in git anymore, since it is a different app)
-	fs.removeSync(path.join(baseDir,".git/"));
+	await fs.remove(path.join(opts.dir,".git/"));
+
 
 	// rename the src/.../java folders src/.../TMP-JAVA (to make sure we can create a fresh new structure)
-	fs.renameSync(path.join(baseDir,"/src/main/java"), path.join(baseDir,"/src/main/TMP-JAVA"));
-	fs.renameSync(path.join(baseDir,"/src/test/java"), path.join(baseDir,"/src/test/TMP-JAVA"));
+	await fs.rename(path.join(opts.dir,"/src/main/java"), path.join(opts.dir,"/src/main/TMP-JAVA"));
+	await fs.rename(path.join(opts.dir,"/src/test/java"), path.join(opts.dir,"/src/test/TMP-JAVA"));
 
 	var packagePath = packageNames.join("/");
-	var baseMainJavaDir = path.join(baseDir,"/src/main/java",packagePath);
-	var baseTestJavaDir = path.join(baseDir,"/src/test/java",packagePath);
+	var baseMainJavaDir = path.join(opts.dir,"/src/main/java",packagePath);
+	var baseTestJavaDir = path.join(opts.dir,"/src/test/java",packagePath);
 
 	// --------- copy base java files --------- //
 	// create the new main java package folder with the org/projectmvc main java files	
-	fs.mkdirsSync(baseMainJavaDir);
-	fs.copySync(path.join(baseDir,"/src/main/TMP-JAVA/org/projectmvc"), baseMainJavaDir);
-	fs.removeSync(path.join(baseDir,"/src/main/TMP-JAVA")); // not needed anymore
+	await fs.mkdirs(baseMainJavaDir);
+	await fs.copy(path.join(opts.dir,"/src/main/TMP-JAVA/org/projectmvc"), baseMainJavaDir);
+	await fs.remove(path.join(opts.dir,"/src/main/TMP-JAVA")); // not needed anymore
 
 	// create the new test java package folder with the org/projectmvc test java files	
-	fs.mkdirsSync(baseTestJavaDir);
-	fs.copySync(path.join(baseDir,"/src/test/TMP-JAVA/org/projectmvc"), baseTestJavaDir);
-	fs.removeSync(path.join(baseDir,"/src/test/TMP-JAVA")); // not needed anymore	
+	await fs.mkdirs(baseTestJavaDir);
+	await fs.copy(path.join(opts.dir,"/src/test/TMP-JAVA/org/projectmvc"), baseTestJavaDir);
+	await fs.remove(path.join(opts.dir,"/src/test/TMP-JAVA")); // not needed anymore
 	// --------- /copy base java files --------- //
 
 	// --------- replace package --------- //
-	var replacePackage = {rgx: /org\.projectmvc/ig, val: basePackage};
+	var replacePackage = {rgx: /org\.projectmvc/ig, val: opts.package};
 	// all main .java files
-	var packageFiles = glob.sync(path.join(baseMainJavaDir,"**/*.java"));
+	var packageFiles = await fs.listFiles(baseMainJavaDir, ".java");
 	// plus all test .java files
-	packageFiles = packageFiles.concat(glob.sync(path.join(baseTestJavaDir,"**/*.java")));
+	packageFiles = packageFiles.concat(await fs.listFiles(baseTestJavaDir, ".java"));
 	// plus snow.properties
-	packageFiles.push(path.join(baseDir,"/src/main/webapp/WEB-INF/snow.properties"));		
+	packageFiles.push(path.join(opts.dir,"/src/main/webapp/WEB-INF/snow.properties"));		
 	// plus pom.xml
-	packageFiles.push(path.join(baseDir,"pom.xml"));	
+	packageFiles.push(path.join(opts.dir,"pom.xml"));	
 
 	replaceInFiles(packageFiles, replacePackage);
 	// --------- /replace package --------- //
 
 	// --------- replace appName --------- //
-	var replaceAppName = {rgx: /projectmvc/ig, val: appName};
-	var appNameFiles = [path.join(baseDir, "pom.xml"),
-											// config files
-											path.join(baseDir,"/src/main/webapp/WEB-INF/sql/00_create-db.sql"),
-											path.join(baseDir,"/src/main/webapp/WEB-INF/snow.properties"), 
-											// web files
-											path.join(baseDir,"/src/main/webapp/_frame.ftl"),
-											path.join(baseDir,"/src/main/webapp/loginpage.ftl"),
-											path.join(baseDir,"/src/main/webapp/src/view/MainView.tmpl"),
-											path.join(baseDir,"/src/main/webapp/sysadmin/src/view/AdminView.tmpl"),
-											// nodejs files
-											path.join(baseDir,"gulpfile.js"),
-											path.join(baseDir,"package.json")];
+	var replaceAppName = {rgx: /projectmvc/ig, val: opts.appName};
+
+
+	var appNameFiles = ["pom.xml",
+		// config files
+		"/src/main/webapp/WEB-INF/sql/00_create-db.sql",
+		"/src/main/webapp/WEB-INF/snow.properties", 
+		// web files
+		"/src/main/webapp/_frame.ftl",
+		"/src/main/webapp/loginpage.ftl",
+		// nodejs files
+		"package.json"].map(n => path.join(opts.dir, n));
 
 	replaceInFiles(appNameFiles, replaceAppName);
 	// --------- /replace appName --------- //

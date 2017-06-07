@@ -1,5 +1,8 @@
-var ops = require("./ops.js");
-var _scaffold = require("./scaffold.js");
+const fs = require("fs-extra-plus");
+const path = require("path");
+const ops = require("./ops.js");
+const utils = require("./utils.js");
+const _scaffold = require("./scaffold.js");
 
 //////
 // This module is made to be function called for command lines with vdev ... (and can be extended from custom scripts, like local server.js)
@@ -18,8 +21,24 @@ async function setupEc2Install(dir){
 }
 
 
-async function scaffold(basePackage, appName){
-	return await _scaffold.init("./", basePackage, appName);
+async function scaffold(){
+
+	const scaffoldJsonFile = "scaffold.json";
+
+	// if the scaffold file does not exist, create it, and ask the user to fill it up
+	if (!await fs.pathExists(scaffoldJsonFile)){
+		await fs.copy(path.join(__dirname, "templates/", "scaffold.json.tmpl"), scaffoldJsonFile);
+
+		console.log("scaffold.json not found, created it. Please fill it up");
+		return;
+	}
+
+	var scaffoldOpts = await utils.readJson("scaffold.json");
+	if (!scaffoldOpts.package || !scaffoldOpts.appName){
+		console.log(".package or .appName are not defined in the scaffold.json");
+	}
+
+	await _scaffold.create(scaffoldOpts);
 }
 
 // --------- Ops Server ParentDir --------- //
