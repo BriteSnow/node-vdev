@@ -2,6 +2,7 @@ var path = require("path");
 var spawn = require("p-spawn");
 var fs = require("fs-extra-plus");
 var git = require("./git.js");
+var utils = require("./utils.js");
 
 module.exports = {
 	create
@@ -71,7 +72,7 @@ async function create(opts){
 	// plus pom.xml
 	packageFiles.push(path.join(opts.dir,"pom.xml"));	
 
-	replaceInFiles(packageFiles, replacePackage);
+	utils.replaceInFiles(packageFiles, replacePackage);
 	// --------- /replace package --------- //
 
 	// --------- replace appName --------- //
@@ -88,30 +89,13 @@ async function create(opts){
 		// nodejs files
 		"package.json"].map(n => path.join(opts.dir, n));
 
-	replaceInFiles(appNameFiles, replaceAppName);
+	utils.replaceInFiles(appNameFiles, replaceAppName);
 	// --------- /replace appName --------- //
 
 }
 
 
 // --------- Private Utilities --------- //
-
-async function replaceInFiles(files, replaceCmds){
-	files  = makeArray(files);	
-	replaceCmds = makeArray(replaceCmds);
-
-		
-	for (let i = 0; i < files.length; i++){
-		let file = files[i];
-		let content = await fs.readFileSync(file, 'utf8');
-		for (let j = 0; j < replaceCmds.length; j++){
-			let replaceCmd = replaceCmds[j];
-			content = content.replace(replaceCmd.rgx,replaceCmd.val);	
-		}		
-		await fs.writeFile(file, content, 'utf8');		
-	}		
-}
-
 
 // if val is not an Array, it does make an array with val as the only element
 function makeArray(val){
