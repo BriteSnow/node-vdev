@@ -18,9 +18,17 @@ async function readJson(file){
 async function replaceInFiles(files, replaceCmds){
 	files  = ensureArray(files);	
 	replaceCmds = ensureArray(replaceCmds);
-		
+
 	for (let i = 0; i < files.length; i++){
 		let file = files[i];
+
+		// if the file does not exist, just warn but ignore
+		let exists = await fs.pathExists(file);
+		if (!exists){			
+			console.log(`File not found (skipping replace): ${file}`);
+			continue;
+		}
+		
 		let content = await fs.readFile(file, 'utf8');
 		for (let j = 0; j < replaceCmds.length; j++){
 			let replaceCmd = replaceCmds[j];

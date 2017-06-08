@@ -72,8 +72,10 @@ async function create(opts){
 	// plus pom.xml
 	packageFiles.push(path.join(opts.dir,"pom.xml"));	
 
-	utils.replaceInFiles(packageFiles, replacePackage);
+
+	await utils.replaceInFiles(packageFiles, replacePackage);
 	// --------- /replace package --------- //
+
 
 	// --------- replace appName --------- //
 	var replaceAppName = {rgx: /projectmvc/ig, val: opts.appName};
@@ -87,9 +89,10 @@ async function create(opts){
 		"/src/main/webapp/_frame.ftl",
 		"/src/main/webapp/loginpage.ftl",
 		// nodejs files
-		"package.json"].map(n => path.join(opts.dir, n));
+		"package.json",
+		"scripts/db.js"].map(n => path.join(opts.dir, n));
 
-	utils.replaceInFiles(appNameFiles, replaceAppName);
+	await utils.replaceInFiles(appNameFiles, replaceAppName);
 	// --------- /replace appName --------- //
 
 }
