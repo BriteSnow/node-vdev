@@ -25,7 +25,7 @@
 		"moduleResolution": "node", 
 
 		"declaration": true,
-		"declarationDir": "typings/",
+		"declarationDir": "types/",
 
 
 		// allow to import moment like: import moment from "moment"
