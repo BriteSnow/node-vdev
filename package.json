@@ -1,10 +1,10 @@
 {
   "name": "vdev",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "description": "Some devops utilities for high velocity development and deployment, support Docker, Kubernetes, Java, Node.js and web (rollup/postcss/typescript).",
   "author": "Jeremy Chone <jeremy.chone@gmail.com>",
   "main": "dist/main.js",
-  "typings": "types/main.d.ts",
+  "typings": "dist/types/main.d.ts",
   "repository": {
     "type": "git",
     "url": "git://github.com/BriteSnow/node-vdev.git"
@@ -12,7 +12,7 @@
   "dependencies": {
     "@google-cloud/storage": "^1.6.0",
     "@types/chokidar": "^1.7.5",
-    "@types/google-cloud__storage": "^1.1.7",
+    "@types/google-cloud__storage": "^1.1.npm 7",
     "@types/handlebars": "^4.0.37",
     "@types/js-yaml": "^3.11.1",
     "@types/micromatch": "^3.1.0",
