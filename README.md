@@ -1,151 +1,89 @@
 ## About
 
-_vdev_ node module is a set of utilities for high velocity development and operation. 
+_vdev_ node module is a set of utilities for high velocity devops, currently specifically focused on docker, kubernetes, postgres, node.js/java, typescript/rollup/postcss for front-ends. 
 
-Note that this module is not meant to support any technology, any architecture, but rather very focused set of mature and modern set of technologies that we (i.e. BriteSnow) strong recommend for high velocity development: 
-
-- Java 8 / Guice / Snow on the server side, for highly productive and scalable development platform and runtime. 
-- HTML5 / jQuery-Core / Handlebars / PostCSS (or less) / brite.js as DOM Centric MVC approach for the client side. 
-- Postgresql as relational datastore.
-- BigData store and other store agnostic (no particular utilities for those services)
-
-This module is designed to be used in two different mode: 
-
-- Development, in this case the _vdev_ module will be used in a gulp settings with other build related modules (e.g., PostCSS, Handlebars processors, minimizer/source-map, ...)
-
-- Production, in this case the package.json and ops.js will be used as a custom command line to easily customize some of the QA/Staging/Production script while keeping everything as close as possible to development environment.
-
-*NOTE* This module is still experimental and will go through so changes over the new few months. 
-
-## Install
-
-Note: Not yet as npm module. Will be soon.
-
-Inside your pom.xml directory or in the jettybase parent folder, call the following
-
-```js
-npm install npm install git+https://git@github.com/BriteSnow/node-vdev.git --save
-```
-
-## Dev Usage
-
-In a dev environment (i.e. in a maven context), the goal is to use gulp for all dev node.js task. 
-
-First, install the following
-```
-npm install gulp --save
-```
-
-_gulpfile.js_
-```js
-var hbsp = require("hbsp");
-var vdev = require("vdev");
-var path = require("path");
-var concat = require('gulp-concat');
-var gulp = require("gulp");
+_vdev 0.6+ has been complely refactored to support docker, kubernetes, node.js/java, typescript/rollup/postcss for front-end devops/repl development_
 
 
-var hbsPrecompile = hbsp.precompile;
+**NOTE**: At this point this tool is very focused on a specific set of technologies (java/maven, node.js, postgres as db, and google cloud platform). For anybody external to BriteSnow dev (or its client), it might be considered experimental as API and cli might changes. 
 
-var webappDir = "src/main/webapp/";
-var sqlDir = "src/main/webapp/WEB-INF/sql/";
+**vdev** has to main constructs: 
 
-gulp.task('default',['hbs']);
+- **bocks** are module or service (when dockerfile) that get built. vDev recognize if there is a `tsconfig.json`, `package.json`, `pom.xml`, or `Dockerfile` and perform the appropriate built. As of now, vdev does not have a plugin feature, but this will come in the future. Block can also have `webBundles` which can be .js, .ts, .pcss (postcss), or .tmpl (handlebars assume), and vdev will do the appropriate  compile.
 
-// --------- Web Assets Processing --------- //
-gulp.task('hbs', function() {
-    gulp.src(path.join(webappDir,"/tmpl/",'*.hbs'));
-        .pipe(hbsPrecompile())
-        .pipe(concat("templates.js"))
-        .pipe(gulp.dest(path.join(webappDir,"/js/")));
-});
-// --------- /Web Assets Processing --------- //
+- **realms** are kubernetes/cluster contexts where container blocks and yaml resources get deployed to. Realm commands allow to change easily between those k8s contexts and gcp project in one command, and provide simple yet powerfull yaml handlebars templating scheme.
 
-gulp.task('recreateDb', function(){
-    vdev.psql("postgres", null, "postgres", vdev.listSqlFiles(sqlDir,{to:0}));      
-    vdev.psql(dbPrefix + "_user", null, dbPrefix + "_db", vdev.listSqlFiles(sqlDir,{from:1}));
-});
+#### Requirements:
 
-```
+Minimum requirement:
+- **node.js > 8**
+- **Docker for mac with Kubernetes** support (current edge)
+- **Java and Maven** for java blocks
+- **Typescript installed globally** (for now) if some typescript blocks
 
-Then, in the command line, you can do
+GCP requirement (for deployment):
+- **gcloud** command lines instaleld with the appropriate authentication.
 
-```
-$ gulp recreateDb
-```
+AWS support will be added when it will suport Kubernetes (i.e., When EKS will be GA)
 
+## Quick start
 
+First let's define the `vdev.yaml` at the root of the monorepo. 
 
-## Prod Usage
+```yaml
+system: halo
+baseBlockDir: services/ # used as the base dir .dir (as '${baseDir}/${blockName}/'')
+k8sDir: k8s/ # root 
 
-In a prod setup, we do not really need gulp so we can use a command line approach (see below). 
+realms:
+  _common:  # common/default values that will be used for each realm
+    yamlDir: gke/ # so `k8s/gke` will be the yamlDir if not overriden below.
 
-We are using jetty as our web server, and we usually have the following folder structure: 
+  dev:
+    context: docker-for-desktop
+    yamlDir: dev/ # Override the common yaml dir to `k8s/dev/` 
+                  #(dev has hooks for debugging and such, and commong yaml files will just add more complexity)
 
-```
-+ appname_suffix
-  + jettybase
-    - start.ini (jetty init file, with the port number)
-    + webapps
-      + appname_war (this is the war folder usually git pull of the target/appname/ folder)
-      - appname_war.xml (context xml)
-      - appname_war.properties (snow will override the WEB-INF/snow.properties with the properties in this files)
-  - jetty.pid (the vdev will keep the pid of the new jetty process created in this file for future shutdown)
+  stage:
+    context: gke_my-gcp-project_us-west1-stage-cluster
+    project: my-gcp-project
 
-```
+  prod:
+    confirmOnDelete: true
+    context: gke_my-gcp-prod-project-_us-west1-prod-cluser
+    project: my-gcp-prod-project
+    loadBalancerIP: '35.33.23.18'
 
-```_suffix``` can be the ```_qa``` or ```_stage```. 
-
-
-In the ```appname_suffix``` directory execute this command
-
-```
-npm install npm install git+https://git@github.com/BriteSnow/node-vdev.git --save
-```
-
-Then, create the following file: 
-
-_ops.js_
-```js
-var vdev = require("vdev");
-
-var sqlDir = "src/main/webapp/WEB-INF/sql/"; // standard location for a webfile
-var dbPrefix = "myapp"; // this will default to myapp_db and myapp_user by convention (see below)
-var appName = "myapp"; // this is the war appname prefix that will be used in ops, "jettybase/webapps/myapp_war"
-
-// list of commands
-var cmds = {
-    
-    recreateDb: function(){
-        // NOTE: obviously, this works for a QA server that needs to be refreshed, but not in a full production server. In a production setup, we would not have "recreateDb" but perhaps more something like "updateDb"
-        vdev.psql("postgres", null, "postgres", vdev.listSqlFiles(sqlDir,{to:0}));      
-        vdev.psql(dbPrefix + "_user", null, dbPrefix + "_db", vdev.listSqlFiles(sqlDir,{from:1}));
-    },
-
-    start: function(){
-        vdev.startJetty("jettybase/"); // not implemented yet
-    }, 
-
-    stop: function(){
-        vdev.stopJetty("jettybase/"); // not implemented yet
-    }
-
-};
-
-
-// call the right command from the process.argv within this list of cmds functions
-vdev.execCmd(cmds);
+blocks:
+  - db
+  - queue
+  - agent
+  - importer
+  - name: web
+    dir: web/
+    baseDistDir: web-server/src/main/webapp
+    webBundles:
+      - name: lib
+        entries: ./src/lib-bundle.js
+        dist: ./js/lib-bundle.js
+      - name: app
+        entries: ./src/**/*.ts
+        dist: ./js/app-bundle.js
+        rollupOptions:
+          globals:
+            d3: window.d3
+            mvdom: window.mvdom
+            handlebars: window.Handlebars        
+      - name: css
+        entries: ./src/**/*.pcss
+        dist: ./css/all-bundle.css
+      - name: tmpl
+        entries: ./src/**/*.tmpl
+        dist: ./js/templates.js
+  - name: web-server
+    dir: web-server/
+    dbuildDependencies: web # build dependency for when running dbuild (no effect on build).
 ```
 
 
-To start execute a command, just do
-
-```
-node ops recreateDb
-```
-
-The benefit of this approach is that you can simply add more functions as your operation require and bring any other node.js module you might need. The ```vdev``` module is just helping with some of the default operation architecture 
-
-
-
-
+... more coming later ...
