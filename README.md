@@ -1,11 +1,11 @@
 ## About
 
-_vdev_ node module is a set of utilities for high velocity devops, currently specifically focused on docker, kubernetes, postgres, node.js/java, typescript/rollup/postcss for front-ends. 
+**vdev** is a set of utilities for high velocity devops, specifically focused on docker, kubernetes, postgres, node.js/java, typescript/rollup/postcss for front-ends development. 
 
-_vdev 0.6+ has been complely refactored to support docker, kubernetes, node.js/java, typescript/rollup/postcss for front-end devops/repl development_
+**IMPORTANT** **vdev 0.6+** has been complely refactored to support docker, kubernetes, node.js/java, typescript/rollup/postcss for front-end devops/repl development
 
 
-**NOTE**: At this point this tool is very focused on a specific set of technologies (java/maven, node.js, postgres as db, and google cloud platform). For anybody external to BriteSnow dev (or its client), it might be considered experimental as API and cli might changes. 
+**NOTE**: At this point this tool is very focused on a specific set of technologies (docker/kubernetes), java/maven, node.js, postgres as db, and google cloud platform). For anybody external to BriteSnow dev (or its client), it might be considered experimental as API and cli might changes. 
 
 **vdev** has to main constructs: 
 
