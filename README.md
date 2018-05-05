@@ -20,6 +20,7 @@ Minimum requirement:
 - **Docker for mac with Kubernetes** support (current edge)
 - **Java and Maven** for java blocks
 - **Typescript installed globally** (for now) if some typescript blocks
+- **docker for 'npm test'**
 
 GCP requirement (for deployment):
 - **gcloud** command lines instaleld with the appropriate authentication.
