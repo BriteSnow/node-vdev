@@ -46,8 +46,9 @@ export async function loadYaml(path: string) {
 
 export async function saferRemove(relPath: string, log?: boolean) {
 	log = (log !== false); // default is true
+	const baseDir = path.resolve('./');
 	const fullPath = path.resolve(relPath);
-	if (!fullPath.includes('verb')) {
+	if (!fullPath.startsWith(baseDir)) {
 		throw new Error(`Path to be removed does not look safe (nothing done): ${fullPath}`);
 	}
 	const exists = await fs.pathExists(fullPath);
