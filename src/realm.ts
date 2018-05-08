@@ -300,6 +300,11 @@ function getHandlebars() {
 		return username;
 	});
 
+	// return the absolute dir of the project (where the script is being run) (with an ending '/')
+	handlebars.registerHelper('projectDir', function () {
+		return path.resolve('./') + '/';
+	});
+
 	// --------- /Handlebars Helpers --------- //
 
 	_handlebars = handlebars;

@@ -1,5 +1,5 @@
 import { Realm, loadRealms, getCurrentRealm, assertRealm, setRealm, formatAsTable, templatize } from '../main';
-import { kcreate as _kcreate, kdel, kshRestart, klogs as _klogs } from '../main';
+import { kcreate as _kcreate, kexec as _kexec, kdel, kshRestart, klogs as _klogs } from '../main';
 import { push } from '../main';
 import { psqlImport } from '../main';
 import * as fs from 'fs-extra-plus';
@@ -8,7 +8,7 @@ import { CmdMap } from '../utils';
 
 
 export const cmds: CmdMap = {
-	realm, ktemplate, kcreate, kdelete, krestart, klogs, gpush, recreateDb
+	realm, ktemplate, kexec, kcreate, kdelete, krestart, klogs, gpush, recreateDb
 }
 
 // --------- Realm CMDs --------- //
@@ -59,6 +59,15 @@ async function ktemplate(argv: ParsedArgs) {
 		console.log(`Templatize resource '${item.name}' to '${item.path}'`);
 	}
 }
+
+async function kexec(argv: ParsedArgs) {
+	const resourcesStr = argv._[0];
+	const args = argv._.slice(1);
+
+	const realm = assertRealm(await getCurrentRealm());
+	await _kexec(realm, resourcesStr, args);
+}
+
 
 async function kcreate(argv: ParsedArgs) {
 	const resourcesStr = argv._[0];

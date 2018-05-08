@@ -114,6 +114,27 @@ export async function kshRestart(realm: Realm, serviceNamesStr: string) {
 	// TODO: Run: kubectl exec $(kubectl get pods -l run=halo-web-server --no-headers=true -o custom-columns=:metadata.name) -- /service/restart.sh
 	// TODO: needs to check if the service has restart.sh in the source tree, otherwise warn and skip the service
 }
+
+export async function kexec(realm: Realm, serviceNamesStr: string, commandAndArgs: string[]) {
+	const serviceNames = asNames(serviceNamesStr);
+	const pods = await fetchK8sObjectsByType('pods');
+
+	for (let serviceName of serviceNames) {
+		const podNames = await getPodNames(pods, { labels: { run: `${realm.system}-${serviceName}` } });
+
+		for (let podName of podNames) {
+
+			try {
+				let args = ['exec', podName, '--']; // base arguments
+				args = args.concat(commandAndArgs); // we add the sub command and arguments
+				await spawn('kubectl', args); // for now, we have it in the toConsole, but should put it configurable
+			} catch (ex) {
+				console.log(`Cannot run ${commandAndArgs} on pod ${podName} because ${ex}`);
+				continue;
+			}
+		}
+	}
+}
 // --------- /Public create/delete/logs/restart --------- //
 
 // --------- Public get/set context --------- //
