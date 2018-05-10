@@ -1,5 +1,5 @@
 import { Realm, loadRealms, getCurrentRealm, assertRealm, setRealm, formatAsTable, templatize } from '../main';
-import { kcreate as _kcreate, kexec as _kexec, kdel, kshRestart, klogs as _klogs } from '../main';
+import { kcreate as _kcreate, kapply as _kapply, kexec as _kexec, kdel, kshRestart, klogs as _klogs } from '../main';
 import { push } from '../main';
 import { psqlImport } from '../main';
 import * as fs from 'fs-extra-plus';
@@ -8,7 +8,7 @@ import { CmdMap } from '../utils';
 
 
 export const cmds: CmdMap = {
-	realm, ktemplate, kexec, kcreate, kdelete, krestart, klogs, gpush, recreateDb
+	realm, ktemplate, kexec, kcreate, kapply, kdelete, krestart, klogs, gpush, recreateDb
 }
 
 // --------- Realm CMDs --------- //
@@ -74,6 +74,13 @@ async function kcreate(argv: ParsedArgs) {
 
 	const realm = assertRealm(await getCurrentRealm());
 	await _kcreate(realm, resourcesStr);
+}
+
+async function kapply(argv: ParsedArgs) {
+	const resourcesStr = argv._[0];
+
+	const realm = assertRealm(await getCurrentRealm());
+	await _kapply(realm, resourcesStr);
 }
 
 async function kdelete(argv: ParsedArgs) {

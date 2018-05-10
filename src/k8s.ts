@@ -20,6 +20,21 @@ export async function kcreate(realm: Realm, resourceNames?: string | string[]) {
 
 }
 
+export async function kapply(realm: Realm, resourceNames?: string | string[]) {
+	const names = await getResourceNames(realm, resourceNames);
+
+	for (let name of names) {
+		const fileName = await renderRealmFile(realm, name);
+		try {
+			const args = ['apply', '-f', fileName];
+			await spawn('kubectl', args);
+		} catch (ex) {
+			console.log(`Can't kapply ${fileName}, skipping`);
+		}
+		console.log();
+	}
+}
+
 // TODO: need to have a way to force the YES when use as API outside of cmd.
 export async function kdel(realm: Realm, resourceNames?: string | string[]) {
 	const names = await getResourceNames(realm, resourceNames);
