@@ -28,7 +28,6 @@ export interface WebBundle {
 
 	type?: string; // set in the buildWebBundles
 	dir?: string; // set in the initWebBundle
-	allEntries: string[]; // set in the initWebBundle
 }
 
 export type BlockByName = { [name: string]: Block };
@@ -298,9 +297,6 @@ async function initWebBundle(block: Block, bundle: WebBundle) {
 	// Make the entries relative to the Block
 	bundle.entries = asNames(bundle.entries).map((f) => specialPathResolve('', bundle.dir!, f));
 
-	// resolve all of the entries (with glob)
-	bundle.allEntries = (await glob(bundle.entries)).map(entryItem => (typeof entryItem === 'string') ? entryItem : entryItem.path);
-
 	// resolve the dist
 	bundle.dist = specialPathResolve('', block.baseDistDir!, bundle.dist);
 
@@ -334,7 +330,9 @@ async function buildTsBundler(block: Block, bundle: WebBundle, opts?: BuildOptio
 		if (opts && opts.watch) {
 			bundle.rollupOptions.watch = true;
 		}
-		await rollupFiles(bundle.allEntries, bundle.dist, bundle.rollupOptions);
+		// resolve all of the entries (with glob)
+		const allEntries = await resolveGlobs(bundle.entries);
+		await rollupFiles(allEntries, bundle.dist, bundle.rollupOptions);
 	} catch (ex) {
 		// TODO: need to move exception ahndle to the caller
 		console.log("BUILD ERROR - something when wrong on rollup\n\t", ex);
@@ -345,18 +343,21 @@ async function buildTsBundler(block: Block, bundle: WebBundle, opts?: BuildOptio
 }
 
 async function buildPcssBundler(block: Block, bundle: WebBundle, opts?: BuildOptions) {
-	await pcssFiles(bundle.allEntries, bundle.dist);
+	const allEntries = await resolveGlobs(bundle.entries);
+	await pcssFiles(allEntries, bundle.dist);
 }
 
 async function buildTmplBundler(block: Block, bundle: WebBundle, opts?: BuildOptions) {
-	await tmplFiles(bundle.allEntries, bundle.dist);
+	const allEntries = await resolveGlobs(bundle.entries);
+	await tmplFiles(allEntries, bundle.dist);
 }
 
 async function buildJsBundler(block: Block, bundle: WebBundle, opts?: BuildOptions) {
 	if (opts && opts.watch) {
 		bundle.rollupOptions.watch = true;
 	}
-	await rollupFiles(bundle.allEntries, bundle.dist, bundle.rollupOptions);
+	const allEntries = await resolveGlobs(bundle.entries);
+	await rollupFiles(allEntries, bundle.dist, bundle.rollupOptions);
 }
 // --------- /Private Bundlers --------- //
 
@@ -424,6 +425,10 @@ export async function loadBlock(name: string): Promise<Block> {
 
 // --------- Private Utils --------- //
 
+async function resolveGlobs(globs: string | string[]) {
+	// resolve all of the entries (with glob)
+	return (await glob(globs)).map(entryItem => (typeof entryItem === 'string') ? entryItem : entryItem.path);
+}
 // Get the variable string value from a content of code. Format should be `name = "value"` (support also ':' rather than '=' for json), and te value will be returned.
 // Used in version to get the `appVersion` from the code.
 function getVarValue(content: string, name: string) {
