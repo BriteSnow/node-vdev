@@ -119,16 +119,18 @@ export async function kshRestart(realm: Realm, serviceNamesStr: string) {
 
 			// TODO need to check if there is a /service/restart.sh
 			try {
-				const args = ['exec', podName, '--', 'test', '-e', '/service/restart.sh'];
+				const args = ['exec', podName];
 				addNamespaceIfDefined(realm, args);
+				args.push('--', 'test', '-e', '/service/restart.sh');
 				await spawn('kubectl', args, { toConsole: false });
 			} catch (ex) {
 				console.log(`Skipping service ${serviceName} - '/service/restart.sh' not found.`);
 				continue;
 			}
 			console.log(`\n--- Restarting: ${serviceName} (pod: ${podName})`);
-			const args = ['exec', podName, '--', '/service/restart.sh'];
+			const args = ['exec', podName];
 			addNamespaceIfDefined(realm, args);
+			args.push('--', '/service/restart.sh');
 			await spawn('kubectl', args);
 			console.log(`--- DONE: ${serviceName} : ${podName}`);
 		}
