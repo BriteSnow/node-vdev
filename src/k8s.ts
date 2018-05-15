@@ -27,6 +27,7 @@ export async function kapply(realm: Realm, resourceNames?: string | string[]) {
 		const fileName = await renderRealmFile(realm, name);
 		try {
 			const args = ['apply', '-f', fileName];
+			addNamespaceIfDefined(realm, args);
 			await spawn('kubectl', args);
 		} catch (ex) {
 			console.log(`Can't kapply ${fileName}, skipping`);
@@ -51,6 +52,7 @@ export async function kdel(realm: Realm, resourceNames?: string | string[]) {
 	for (let kName of names) {
 		const fileName = await renderRealmFile(realm, kName);
 		const args = ['delete', '-f', fileName];
+		addNamespaceIfDefined(realm, args);
 		try {
 			await spawn('kubectl', args);
 		} catch (ex) {
@@ -64,16 +66,17 @@ let currentLogPodName: string | null = null;
 
 export async function klogs(realm: Realm, resourceNames?: string | string[]) {
 	const names = await getResourceNames(realm, resourceNames);
-	const pods = await fetchK8sObjectsByType('pods');
+	const pods = await fetchK8sObjectsByType(realm, 'pods');
 
 	for (let serviceName of names) {
 		const podNames = await getPodNames(pods, { labels: { run: `${realm.system}-${serviceName}` } });
 
 		for (let podName of podNames) {
 			console.log(`Will show log for pod: ${podName}`);
-
+			const args = ['logs', '-f', podName];
+			addNamespaceIfDefined(realm, args);
 			// Note: here we do not await, because, we want to be able to launch multiple at the same time, and not be blocking.
-			spawn('kubectl', ['logs', '-f', podName], {
+			spawn('kubectl', args, {
 				detached: true,
 				onStdout: function (data) {
 					// If we had a log block before, and not the same as this one, we end it. 
@@ -107,7 +110,7 @@ export async function klogs(realm: Realm, resourceNames?: string | string[]) {
 export async function kshRestart(realm: Realm, serviceNamesStr: string) {
 	const serviceNames = asNames(serviceNamesStr);
 
-	const pods = await fetchK8sObjectsByType('pods');
+	const pods = await fetchK8sObjectsByType(realm, 'pods');
 
 	for (let serviceName of serviceNames) {
 		const podNames = await getPodNames(pods, { labels: { run: `${realm.system}-${serviceName}` } });
@@ -116,13 +119,17 @@ export async function kshRestart(realm: Realm, serviceNamesStr: string) {
 
 			// TODO need to check if there is a /service/restart.sh
 			try {
-				await spawn('kubectl', ['exec', podName, '--', 'test', '-e', '/service/restart.sh'], { toConsole: false });
+				const args = ['exec', podName, '--', 'test', '-e', '/service/restart.sh'];
+				addNamespaceIfDefined(realm, args);
+				await spawn('kubectl', args, { toConsole: false });
 			} catch (ex) {
 				console.log(`Skipping service ${serviceName} - '/service/restart.sh' not found.`);
 				continue;
 			}
 			console.log(`\n--- Restarting: ${serviceName} (pod: ${podName})`);
-			await spawn('kubectl', ['exec', podName, '--', '/service/restart.sh']);
+			const args = ['exec', podName, '--', '/service/restart.sh'];
+			addNamespaceIfDefined(realm, args);
+			await spawn('kubectl', args);
 			console.log(`--- DONE: ${serviceName} : ${podName}`);
 		}
 	}
@@ -132,7 +139,7 @@ export async function kshRestart(realm: Realm, serviceNamesStr: string) {
 
 export async function kexec(realm: Realm, serviceNamesStr: string, commandAndArgs: string[]) {
 	const serviceNames = asNames(serviceNamesStr);
-	const pods = await fetchK8sObjectsByType('pods');
+	const pods = await fetchK8sObjectsByType(realm, 'pods');
 
 	for (let serviceName of serviceNames) {
 		const podNames = await getPodNames(pods, { labels: { run: `${realm.system}-${serviceName}` } });
@@ -140,7 +147,10 @@ export async function kexec(realm: Realm, serviceNamesStr: string, commandAndArg
 		for (let podName of podNames) {
 
 			try {
-				let args = ['exec', podName, '--']; // base arguments
+				let args = ['exec', podName]
+				addNamespaceIfDefined(realm, args);
+
+				args.push('--'); // base arguments
 				args = args.concat(commandAndArgs); // we add the sub command and arguments
 				await spawn('kubectl', args); // for now, we have it in the toConsole, but should put it configurable
 			} catch (ex) {
@@ -167,9 +177,18 @@ export async function setCurrentContext(name: string) {
 
 
 // --------- Private Utils --------- //
+function addNamespaceIfDefined(realm: Realm, args: string[]) {
+	const namespace = realm.namespace;
+	if (namespace) {
+		args.push('--namespace', namespace);
+	}
+}
+
 // Fetch the pod for a part
-async function fetchK8sObjectsByType(type: string) {
-	const psResult = await spawn('kubectl', ['get', type, '-o', 'json'], { capture: 'stdout' });
+async function fetchK8sObjectsByType(realm: Realm, type: string) {
+	const args = ['get', type, '-o', 'json'];
+	addNamespaceIfDefined(realm, args);
+	const psResult = await spawn('kubectl', args, { capture: 'stdout' });
 	const podsJsonStr = psResult.stdout.toString();
 	const result = JSON.parse(podsJsonStr);
 	return result.items || [];
