@@ -68,7 +68,6 @@ function getHandlebars() {
 		const obj = fs.readJsonSync(jsonFile);
 		const val = findVal(obj, namePath);
 		options.data.root[varName] = val;
-		console.log(`${varName}: ${val}`);
 	});
 
 
