@@ -1,7 +1,7 @@
 import { cleanNodeFiles, updateVersions, buildBlocksOrBundles, watchBlock, loadDockerBlocks, loadBlock } from '../main';
 import * as fs from 'fs-extra-plus';
 import * as path from 'path';
-import { Realm, getCurrentRealm, assertRealm, getResourceNames } from '../main';
+import { Realm, getCurrentRealm, assertRealm } from '../main';
 import { buildDockerImage } from '../main';
 import { asNames, now, printLog } from '../main';
 import { ParsedArgs } from 'minimist';
@@ -48,5 +48,5 @@ async function dbuild(argv: ParsedArgs) {
 
 async function watch(argv: ParsedArgs) {
 	const blockStr = argv._[0];
-	watchBlock('web');
+	watchBlock(blockStr);
 }

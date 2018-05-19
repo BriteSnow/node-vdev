@@ -27,6 +27,9 @@ export interface Realm {
 	/** imageTag to be used (with the starting ':' (default to "latest") */
 	imageTag?: string;
 
+	/** list of default defaultConfigurations (k8s yaml file names without extension) to be used if "kcreate, ..." has not services description */
+	defaultConfigurations?: string[];
+
 	[key: string]: any;
 }
 
@@ -146,7 +149,7 @@ export type TemplateRendered = { name: string, path: string };
  * @param resourceNames either a single name, comma deliminated set of names, or an array.
  */
 export async function templatize(realm: Realm, resourceNames?: string | string[]): Promise<TemplateRendered[]> {
-	const names = await getResourceNames(realm, resourceNames);
+	const names = await getConfigurationNames(realm, resourceNames);
 	const result: TemplateRendered[] = [];
 
 	for (let name of names) {
@@ -158,16 +161,18 @@ export async function templatize(realm: Realm, resourceNames?: string | string[]
 // --------- /Resource Management --------- //
 
 /**
- * Returns a list of resource names for a given realm and optional resource name comma delimited string or array.
- * - If resourceNames is an array, then, just return as is. 
- * - If resourceNames is string (e.g., 'web-server, queue') then it will split on ',' and trim each item as returns.
+ * Returns a list of k8s configuration file names for a given realm and optional configurations names delimited string or array.
+ * - If configurationNames is an array, then, just return as is.
+ * - If configurationNames is string (e.g., 'web-server, queue') then it will split on ',' and trim each item as returns.
  * - If no resourceNames then returns all of the resourceNames for the realm.
  */
-export async function getResourceNames(realm: Realm, resourceNames?: string | string[]) {
-	if (resourceNames) {
-		return asNames(resourceNames);
+export async function getConfigurationNames(realm: Realm, configurationNames?: string | string[]) {
+	if (configurationNames) {
+		return asNames(configurationNames);
+	} else if (realm.defaultConfigurations) {
+		return realm.defaultConfigurations;
 	} else {
-		return getAllResourceNames(realm);
+		return getAllConfigurationNames(realm);
 	}
 }
 
@@ -232,7 +237,7 @@ export async function loadRealms(): Promise<RealmByName> {
 
 // --------- Private Helpers --------- //
 /** Get all of the resourceNames for a given realm */
-async function getAllResourceNames(realm: Realm): Promise<string[]> {
+async function getAllConfigurationNames(realm: Realm): Promise<string[]> {
 	const dir = getRealmSrcDir(realm);
 	const yamlFiles = await fs.listFiles(dir, '.yaml');
 
