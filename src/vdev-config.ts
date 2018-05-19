@@ -1,5 +1,5 @@
 
-import { loadYaml } from './utils';
+import { loadTemplatizedYaml } from './renderer';
 
 
 
@@ -24,7 +24,7 @@ export async function loadVersionFiles() {
 
 /** Parse the ./vdev.yaml and return as is */
 export async function loadVdevConfig(): Promise<RawVdevConfig> {
-	const conf = await loadYaml('./vdev.yaml');
+	const conf = await loadTemplatizedYaml('./vdev.yaml');
 	// TODO: probably need to do some checks here.
 	return conf as RawVdevConfig;
 }

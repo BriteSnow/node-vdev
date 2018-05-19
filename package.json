@@ -11,8 +11,8 @@
   },
   "dependencies": {
     "@google-cloud/storage": "^1.6.0",
-    "@types/chokidar": "^1.7.5",
     "@types/google-cloud__storage": "^1.1.7",
+    "@types/chokidar": "^1.7.5",
     "@types/handlebars": "^4.0.37",
     "@types/js-yaml": "^3.11.1",
     "@types/micromatch": "^3.1.0",

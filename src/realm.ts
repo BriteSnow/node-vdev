@@ -3,11 +3,11 @@ import { saferRemove, asNames } from './utils';
 import { getCurrentProject, setCurrentProject } from './gcloud';
 import { getCurrentContext, setCurrentContext } from './k8s';
 import { loadVdevConfig } from './vdev-config';
-import { userInfo } from 'os';
+
+import { render } from './renderer';
 
 import * as fs from 'fs-extra-plus';
 import * as path from 'path';
-import * as handlebars from 'handlebars';
 
 
 // --------- Public Types --------- //
@@ -23,6 +23,9 @@ export interface Realm {
 
 	/** The Google project name */
 	project?: string;
+
+	/** imageTag to be used (with the starting ':' (default to "latest") */
+	imageTag?: string;
 
 	[key: string]: any;
 }
@@ -103,7 +106,7 @@ export async function renderRealmFile(realm: Realm, name: string): Promise<strin
 
 	// render the content
 	var data = realm;
-	const outYamlContent = await hbsRender(srcYamlContent, data);
+	const outYamlContent = await render(srcYamlContent, data);
 
 	// for now, we do not generate do any template
 	await fs.ensureDir(realmOutDir);
@@ -169,7 +172,7 @@ export async function getResourceNames(realm: Realm, resourceNames?: string | st
 }
 
 export function getLocalImageName(realm: Realm, serviceName: string) {
-	return "localhost:5000/" + realm.system + '-' + serviceName;
+	return _getImageName(realm, 'localhost:5000/', serviceName);
 }
 
 /**
@@ -178,7 +181,12 @@ export function getLocalImageName(realm: Realm, serviceName: string) {
  * @param serviceName 
  */
 export function getRemoteImageName(realm: Realm, serviceName: string) {
-	return `gcr.io/${realm.project}/${realm.system}-${serviceName}`;
+	return _getImageName(realm, `gcr.io/${realm.project}/`, serviceName);
+}
+
+function _getImageName(realm: Realm, basePath: string, serviceName: string) {
+	const tag = (realm.imageTag) ? realm.imageTag : 'latest';
+	return `${basePath}${realm.system}-${serviceName}:${tag}`;
 }
 
 export function assertRealm(realm?: Realm): Realm {
@@ -256,61 +264,10 @@ async function cleanRealmOutDir(realm: Realm) {
 // --------- /Private Helpers --------- //
 
 
-// --------- Private Handlebars Renderer --------- //
 
 
-async function hbsRender(templateString: string, data: any) {
-	const hbs = getHandlebars();
-	const tmpl = handlebars.compile(templateString, { noEscape: true });
-	const outContent = tmpl(data);
-	return outContent;
-}
-
-let _handlebars: typeof Handlebars | null = null;
 
 
-// return the Handlebars initialized
-function getHandlebars() {
-	if (_handlebars) {
-		return _handlebars;
-	}
-
-	// --------- Handlebars Helpers --------- //
-
-	// encode64
-	handlebars.registerHelper('encode64', function (this: any, arg1: any, arg2: any) {
-		let val: string;
-		let opts: any;
-		// if we do not have two args, then, it is a regular helper
-		if (arg2 === undefined) {
-			opts = arg1;
-			val = opts.fn(this);
-		}
-		// if we have two args, then, the first is the value
-		else {
-			val = arg1 as string;
-			opts = arg2;
-		}
-		const b64 = Buffer.from(val).toString('base64');
-		return b64;
-	});
-
-	handlebars.registerHelper('username', function () {
-		const username = userInfo().username;
-		return username;
-	});
-
-	// return the absolute dir of the project (where the script is being run) (with an ending '/')
-	handlebars.registerHelper('projectDir', function () {
-		return path.resolve('./') + '/';
-	});
-
-	// --------- /Handlebars Helpers --------- //
-
-	_handlebars = handlebars;
-	return _handlebars;
-}
 
 
-// --------- /Private Handlebars Renderer --------- //
 

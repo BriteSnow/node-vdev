@@ -28,8 +28,8 @@ export async function push(realm: Realm, serviceNames?: string | string[]) {
 	}
 
 	for (let serviceName of names) {
-		let sourceImage = getLocalImageName(realm, serviceName) + ":latest";
-		let remoteImage = getRemoteImageName(realm, serviceName) + ":latest";
+		let sourceImage = getLocalImageName(realm, serviceName)
+		let remoteImage = getRemoteImageName(realm, serviceName);
 
 		console.log(`----- Pushing service ${serviceName} : ${remoteImage}`);
 

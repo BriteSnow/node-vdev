@@ -35,13 +35,17 @@ export function asNames(srcNames?: string | string[] | null) {
 
 
 // --------- Utils --------- //
-export async function loadYaml(path: string) {
-	const yamlContent = await fs.readFile(path, 'utf8');
-	const yamlObj = jsyaml.load(yamlContent);
+export async function yaml(content: string) {
+	const yamlObj = jsyaml.load(content);
 	if (!yamlObj) {
 		throw new Error(`Could not load yaml from ${path}`);
 	}
 	return yamlObj;
+}
+
+export async function loadYaml(path: string) {
+	const yamlContent = await fs.readFile(path, 'utf8');
+	return yaml(yamlContent);
 }
 
 export async function saferRemove(relPath: string, log?: boolean) {
@@ -104,7 +108,31 @@ export async function prompt(message: string) {
 		});
 	});
 }
+
+/** Attempted to return the obj value given a dottedNamePath (i.e. 'author.name'). 
+ * @returns undefined if nothing found or obj or dottedNamePath is null/undefined. Return obj if dottedNamePath == ''.
+ **/
+export function findVal(obj: any, dottedNamePath: string) {
+	if (obj == null || dottedNamePath == null) {
+		return;
+	}
+	if (dottedNamePath.trim() === '') {
+		return obj;
+	}
+
+	let val: any = obj;
+	const names = dottedNamePath.split('.');
+	for (let name of names) {
+		val = val[name];
+		if (val == null) { // if null or undefined, stop and return
+			return val;
+		}
+	}
+	return val;
+}
 // --------- /Utils --------- //
+
+
 
 
 
