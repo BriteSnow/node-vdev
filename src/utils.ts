@@ -103,7 +103,7 @@ export async function prompt(message: string) {
 		process.stdin.resume();
 		process.stdin.setEncoding('utf8');
 		process.stdin.on('data', function (text) {
-			process.stdin.end();
+			process.stdin.pause();
 			resolve(text.trim());
 		});
 	});
