@@ -239,7 +239,7 @@ export async function loadRealms(): Promise<RealmByName> {
 /** Get all of the resourceNames for a given realm */
 async function getAllConfigurationNames(realm: Realm): Promise<string[]> {
 	const dir = getRealmSrcDir(realm);
-	const yamlFiles = await fs.listFiles(dir, '.yaml');
+	const yamlFiles = await fs.glob('*.yaml', dir);
 
 	// return the list of names only
 	if (yamlFiles) {

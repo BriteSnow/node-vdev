@@ -122,14 +122,22 @@ async function gpush(argv: ParsedArgs) {
 
 // --------- Database --------- //
 const sqlDir = './sql';
+
+/**
+ * Convention and order of execution is: 
+ * 	- sql files starting with '0' will be ran a postgres users
+ *  - sql files starting with '1' will be ran a dbPrefix_user on dbPrefix_db
+ *  - sql files starting with 'drop-' will be ran a dbPrefix_user on dbPrefix_db
+ * @param argv 
+ */
 async function recreateDb(argv: ParsedArgs) {
 	const host = argv._[0] || "localhost";
 
 	const realm = assertRealm(await getCurrentRealm());
 	const dbPrefix = realm.system + '_';
 
-	await psqlImport({ user: "postgres", db: "postgres", host: host }, await fs.listFiles(sqlDir, { to: 100, suffix: ".sql" }));
-	await psqlImport({ user: dbPrefix + "user", db: dbPrefix + "db", host: host }, await fs.listFiles(sqlDir, { from: 101, suffix: ".sql" }));
-	await psqlImport({ user: dbPrefix + "user", db: dbPrefix + "db", host: host }, await fs.listFiles(sqlDir, { prefix: "drop", suffix: ".sql" }));
+	await psqlImport({ user: "postgres", db: "postgres", host: host }, await fs.glob('0*.sql', sqlDir));
+	await psqlImport({ user: dbPrefix + "user", db: dbPrefix + "db", host: host }, await fs.glob('1*.sql', sqlDir));
+	await psqlImport({ user: dbPrefix + "user", db: dbPrefix + "db", host: host }, await fs.glob('drop-*.sql', sqlDir));
 }
 // --------- /Database --------- //

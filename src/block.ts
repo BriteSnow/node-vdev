@@ -73,16 +73,17 @@ export async function updateVersions() {
 // FIXME: Needs to look at the "blocks" from the config
 export async function cleanNodeFiles() {
 	const filesToDelete = ['./package-lock.json', './node_blockules'];
-	// FIXME: need to get the blocks
-	var dirs = await fs.listDirs(`services`, false);
+
+	const blocks = await loadBlocks();
+
 	// dirs.unshift('./'); // we do not clean the base dir, as it is easy to do by hand, and then, scripts won't work
 	// TODO: probably need to add web-server as well
-
-	for (let dir of dirs) {
+	for (const block of Object.values(blocks)) {
+		const dir = block.dir;
 		for (let fName of filesToDelete) {
 			const fileToDelete = path.join(dir, fName);
 			if ((await fs.pathExists(fileToDelete))) {
-				saferRemove(fileToDelete);
+				fs.saferRemove(fileToDelete);
 			}
 		}
 	}

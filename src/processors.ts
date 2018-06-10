@@ -25,7 +25,7 @@ import { precompile as hbsPrecompile } from 'hbsp'; // promise style
 // --------- For Handlebars --------- //
 export async function tmplFiles(files: string[], distFile: string) {
 
-	await fs.unlinkFiles([distFile]);
+	await fs.saferRemove([distFile]);
 
 	var templateContent = [];
 
@@ -46,7 +46,7 @@ export async function pcssFiles(entries: string[], distFile: string) {
 	var mapFile = distFile + ".map";
 	try {
 
-		await fs.unlinkFiles([distFile, mapFile]);
+		await fs.saferRemove([distFile, mapFile]);
 
 		var processor = postcss(processors);
 		var pcssNodes = [];
