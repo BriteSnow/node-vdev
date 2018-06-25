@@ -36,8 +36,12 @@ export async function push(realm: Realm, serviceNames?: string | string[]) {
 		// we make sure the tag exist
 		await spawn('docker', ['tag', sourceImage, remoteImage]);
 
-		// this assume gcloud has been setup on the local machine
-		await spawn('gcloud', ['docker', '--', 'push', remoteImage]);
+		// This assume gcloud has been setup on the local machine
+		// Note: gcloud requires `gcloud auth configure-docker` and just use `docker push...
+		await spawn('docker', ['push', remoteImage]);
+
+		// old way
+		//await spawn('gcloud', ['docker', '--', 'push', remoteImage]);
 
 		console.log(`----- /DONE pushing ${serviceName} : ${remoteImage} ------\n`);
 	}
