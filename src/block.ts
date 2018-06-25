@@ -33,20 +33,27 @@ export interface WebBundle {
 export type BlockByName = { [name: string]: Block };
 // --------- /Public Types --------- //
 
-export async function updateVersions() {
-	const config: any = await loadVdevConfig();
-	const versionFiles = config.version.files;
+export async function updateVersions(config?: any) {
+	if (!config) {
+		config = await loadVdevConfig();
+	}
+	const versionFiles = config.version.files as string[];
 
-	const packageJson = await fs.readJSON('./package.json');
-
-	// for now, the appVersion == dropVersion (later might have a suffix)
-	const newAppVersion = packageJson.dropVersion;
+	let newAppVersion = config.version.appVersion;
+	// if null, right now, take it from the package.json dropVersion
+	if (newAppVersion == null) {
+		const packageJson = await fs.readJSON('./package.json');
+		// for now, the appVersion == dropVersion (later might have a suffix)
+		newAppVersion = packageJson.dropVersion;
+	}
 
 	let firstUpdate = false; // flag that will be set 
 
 	for (let file of versionFiles) {
 		const originalContent = (await fs.readFile(file, 'utf8')).toString();
-		const fileAppVersion = getVarValue(originalContent, 'appVersion');
+		const isHTML = file.toLowerCase().endsWith('html');
+
+		let fileAppVersion = getVersion(originalContent, isHTML);
 
 		if (newAppVersion !== fileAppVersion) {
 			// On the first update needed, we start the log section for the version update
@@ -56,7 +63,7 @@ export async function updateVersions() {
 			}
 
 			console.log(`Changing appVersion ${fileAppVersion} -> ${newAppVersion} in file: ${file}`);
-			let newContent = replaceVarValue(originalContent, 'appVersion', newAppVersion);
+			let newContent = replaceVersion(originalContent, newAppVersion, isHTML);
 			await fs.writeFile(file, newContent, 'utf8');
 		} else {
 			// Note: for now, we do not log when nothing to do.
@@ -430,20 +437,44 @@ async function resolveGlobs(globs: string | string[]) {
 	// resolve all of the entries (with glob)
 	return (await glob(globs)).map(entryItem => (typeof entryItem === 'string') ? entryItem : entryItem.path);
 }
-// Get the variable string value from a content of code. Format should be `name = "value"` (support also ':' rather than '=' for json), and te value will be returned.
-// Used in version to get the `appVersion` from the code.
-function getVarValue(content: string, name: string) {
-	var rx = new RegExp(name + '\\s*[=:]\\s*"(.*)"', 'i');
-	var match = content.match(rx);
-	return (match) ? match[1] : null;
+
+
+//#region    ---------- AppVersion Utils ---------- 
+
+/** Return the first version found. For html, looks for the `src|href=....?v=___` and for other files the appVersion = ... */
+function getVersion(content: string, isHtml = false) {
+	// look for the href or src ?v=...
+	if (isHtml) {
+		const rgx = /<.*(href|src).*?v=(.*?)(\"|\&)/gm;
+		const r = rgx.exec(content);
+		if (r != null && r.length > 2) {
+			return r[2];
+		} else {
+			return null;
+		}
+	}
+	// look for the appVersion = ...
+	else {
+		var rx = new RegExp('appVersion' + '\\s*[=:]\\s*"(.*)"', 'i');
+		var match = content.match(rx);
+		return (match) ? match[1] : null;
+	}
 }
 
-// Replace the string value of a variable name in a code content. Format same as getVarValue.
-function replaceVarValue(content: string, name: string, value: string) {
-	var rx = new RegExp('(.*' + name + '\\s*[=:]\\s*").*(".*)', 'i');
-	content = content.replace(rx, '$1' + value + '$2');
-	return content;
+function replaceVersion(content: string, value: string, isHtml = false) {
+	if (isHtml) {
+		const rgxRep = /(<.*(href|src).*?v=).*?(\"|\&.*)/g;
+		// $2 not is not used because it is included as part of $1
+		return content.replace(rgxRep, '$1' + value + '$3');
+	}
+	else {
+		var rx = new RegExp('(.*' + 'appVersion' + '\\s*[=:]\\s*").*(".*)', 'i');
+		content = content.replace(rx, '$1' + value + '$2');
+		return content;
+	}
 }
+
+//#endregion ---------- /AppVersion Utils ---------- 
 
 async function ensureDist(bundle: WebBundle) {
 	const distDir = path.dirname(bundle.dist);
