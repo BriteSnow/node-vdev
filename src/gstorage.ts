@@ -44,6 +44,9 @@ export interface DownloadEvents {
 	endFile?: (file: Storage.File) => void;
 }
 
+// TODO: needs to have destDir be dir or file. 
+// FIXME: when dir, destDir should be added a "/" to make sure or use path join
+// TODO: needs to implement or remove the on download events. Not supported right now. 
 export async function download(from: PathInfo, destDir: string, on?: DownloadEvents) {
 	const gfList = await list(from);
 

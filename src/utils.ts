@@ -3,7 +3,6 @@ import * as fs from 'fs-extra-plus';
 import * as jsyaml from 'js-yaml';
 import { ParsedArgs } from 'minimist';
 
-import { spawn } from 'p-spawn';
 
 
 // --------- Lang & Type Utils --------- //
