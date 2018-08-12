@@ -184,15 +184,23 @@ export async function rollupFiles(entries: string[], distFile: string, opts: any
 
 			const watcher = rollup.watch(watchOptions);
 			let startTime: number;
+
 			watcher.on('event', function (evt) {
 				// console.log('rollup watch', evt.code, evt.output);
 				if (evt.code === 'START') {
 					startTime = now();
 				} else if (evt.code === 'END') {
 					console.log(`Recompile ${distFile} done: ${Math.round(now() - startTime)}ms`);
+				} else if (evt.code === 'ERROR') {
+					console.log(`ERROR - Rollup/Typescript error when processing: ${distFile}`);
+					console.log("\t" + evt.error);
+				} else if (evt.code === 'FATAL') {
+					console.log(`FATAL ERROR - Rollup/Typescript fatal error when processing ${distFile}\n
+					>>>>>>>> MUST RESTART WATCH SESSION <<<<<<<<\n\n`, evt.error);
 				}
 
 			});
+
 
 		}
 		// otherwise, we do the full build
