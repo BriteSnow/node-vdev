@@ -108,7 +108,7 @@ export function parsePathInfo(storeAndPathStr?: string) {
 
 async function getBucket(pathInfo: PathInfo) {
 	const bucketInfo = await getBucketInfo(pathInfo.store);
-	const storage = Storage(bucketInfo.conf);
+	const storage = new Storage(bucketInfo.conf);
 	return storage.bucket(bucketInfo.bucketName)
 }
 

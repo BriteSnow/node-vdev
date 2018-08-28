@@ -1,6 +1,6 @@
 {
   "name": "vdev",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "description": "Some devops utilities for high velocity development and deployment, support Docker, Kubernetes, Java, Node.js and web (rollup/postcss/typescript).",
   "author": "Jeremy Chone <jeremy.chone@gmail.com>",
   "main": "dist/main.js",
@@ -12,14 +12,14 @@
   "dependencies": {
     "@google-cloud/storage": "^1.7.0",
     "@types/chokidar": "^1.7.5",
-    "@types/google-cloud__storage": "^1.7.0",
+    "@types/google-cloud__storage": "^1.7.1",
     "@types/handlebars": "^4.0.39",
     "@types/js-yaml": "^3.11.2",
     "@types/micromatch": "^3.1.0",
     "@types/minimist": "^1.2.0",
     "chokidar": "^2.0.4",
     "fast-glob": "^2.2.2",
-    "fs-extra-plus": "^0.4.1",
+    "fs-extra-plus": "^0.5.0",
     "handlebars": "^4.0.11",
     "hbsp": "^0.2.2",
     "js-yaml": "^3.12.0",
@@ -30,11 +30,11 @@
     "postcss-import": "^12.0.0",
     "postcss-mixins": "^6.2.0",
     "postcss-nested": "^3.0.0",
-    "rollup": "^0.64.1",
-    "rollup-plugin-commonjs": "^9.1.5",
+    "rollup": "^0.65.0",
+    "rollup-plugin-commonjs": "^9.1.6",
     "rollup-plugin-multi-entry": "^2.0.2",
     "rollup-plugin-node-resolve": "^3.3.0",
-    "rollup-plugin-typescript2": "^0.16.1"
+    "rollup-plugin-typescript2": "^0.17.0"
   },
   "devDependencies": {
     "@types/mocha": "^5.2.5",
