@@ -6,7 +6,7 @@ import { cmds as buildCmds } from './cmd-build';
 import { cmds as opsCmds } from './cmd-ops';
 import { CmdMap } from '../utils';
 
-var argv = minimist(process.argv.slice(2));
+var argv = minimist(process.argv.slice(2), { '--': true });
 
 const allCmds: { [domainName: string]: CmdMap } = {
 	gs: gsCmds,
