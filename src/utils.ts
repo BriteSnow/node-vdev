@@ -12,7 +12,7 @@ export type Partial<T> = {
 }
 
 // for the bin-vdev & cmd-*
-export type CmdMap = { [fnName: string]: (argv: ParsedArgs) => void }
+export type CmdMap = { [fnName: string]: (miniArgv: ParsedArgs, rawArgv: string[]) => void }
 
 /**
  * Split the eventual comman deliminated string as array of trim items. 

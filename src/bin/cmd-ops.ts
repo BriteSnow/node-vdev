@@ -60,17 +60,9 @@ async function ktemplate(argv: ParsedArgs) {
 	}
 }
 
-async function kexec(argv: ParsedArgs) {
-	const resourcesStr = argv._[0];
-	const args = argv._.slice(1);
-
-	// add the eventual extra arguments (after --) to the list so that it can be pass to the exec
-	// This allow to do a `npm run kexec web-server -- npm test -- -g test-hello` 
-	const extraArgs = argv['--'];
-	if (extraArgs && extraArgs.length > 0) {
-		args.push('--');
-		args.push(...extraArgs);
-	}
+async function kexec(argv: ParsedArgs, rawArgv: string[]) {
+	const resourcesStr = rawArgv[0];
+	const args = rawArgv.slice(1);
 
 	const realm = assertRealm(await getCurrentRealm());
 	await _kexec(realm, resourcesStr, args);

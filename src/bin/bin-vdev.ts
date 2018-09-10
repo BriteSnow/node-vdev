@@ -30,9 +30,13 @@ async function run(agv: ParsedArgs) {
 		}
 
 		// remove the "routing commands" so that the command fn get the specialize context
-		const fnArgv = { ...argv }; // shallow copy
-		fnArgv._ = fnArgv._.slice(2); // new array
-		await fn(fnArgv);
+		const miniArgv = { ...argv }; // shallow copy
+		miniArgv._ = miniArgv._.slice(2); // new array
+
+		// add the rawArgv from same index in case the fn needs it
+		const rawArgv = process.argv.slice(4);
+
+		await fn(miniArgv, rawArgv);
 
 	} catch (ex) {
 		console.log(`${ex}`);
