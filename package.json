@@ -1,6 +1,6 @@
 {
   "name": "vdev",
-  "version": "0.8.3",
+  "version": "0.8.4",
   "description": "Some devops utilities for high velocity development and deployment, support Docker, Kubernetes, Java, Node.js and web (rollup/postcss/typescript).",
   "author": "Jeremy Chone <jeremy.chone@gmail.com>",
   "main": "dist/main.js",
