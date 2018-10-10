@@ -12,35 +12,35 @@
   "dependencies": {
     "@google-cloud/storage": "^1.7.0",
     "@types/chokidar": "^1.7.5",
-    "@types/google-cloud__storage": "^1.7.1",
+    "@types/google-cloud__storage": "^1.7.1",    
     "@types/handlebars": "^4.0.39",
     "@types/js-yaml": "^3.11.2",
     "@types/micromatch": "^3.1.0",
     "@types/minimist": "^1.2.0",
     "chokidar": "^2.0.4",
-    "fast-glob": "^2.2.2",
+    "fast-glob": "^2.2.3",
     "fs-extra-plus": "^0.5.0",
-    "handlebars": "^4.0.11",
+    "handlebars": "^4.0.12",
     "hbsp": "^0.2.2",
     "js-yaml": "^3.12.0",
     "micromatch": "^3.1.10",
     "minimist": "^1.2.0",
     "p-spawn": "^0.4.1",
-    "postcss": "^7.0.2",
+    "postcss": "^7.0.5",
     "postcss-import": "^12.0.0",
     "postcss-mixins": "^6.2.0",
-    "postcss-nested": "^3.0.0",
-    "rollup": "^0.65.0",
-    "rollup-plugin-commonjs": "^9.1.6",
+    "postcss-nested": "^4.1.0",
+    "rollup": "^0.66.6",
+    "rollup-plugin-commonjs": "^9.2.0",
     "rollup-plugin-multi-entry": "^2.0.2",
-    "rollup-plugin-node-resolve": "^3.3.0",
-    "rollup-plugin-typescript2": "^0.17.0"
+    "rollup-plugin-node-resolve": "^3.4.0",
+    "rollup-plugin-typescript2": "^0.17.1"
   },
   "devDependencies": {
     "@types/mocha": "^5.2.5",
     "mocha": "^5.2.0",
     "ts-node": "^7.0.1",
-    "typescript": "^3.0.1"
+    "typescript": "^3.1.2"
   },
   "bin": {
     "vdev": "./dist/bin/bin-vdev.js"
