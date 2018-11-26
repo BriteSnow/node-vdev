@@ -10,9 +10,8 @@
     "url": "git://github.com/BriteSnow/node-vdev.git"
   },
   "dependencies": {
-    "@google-cloud/storage": "^1.7.0",
+    "@google-cloud/storage": "^2.3.1",
     "@types/chokidar": "^1.7.5",
-    "@types/google-cloud__storage": "^1.7.1",
     "@types/handlebars": "^4.0.39",
     "@types/js-yaml": "^3.11.2",
     "@types/micromatch": "^3.1.0",
@@ -34,7 +33,7 @@
     "rollup-plugin-commonjs": "^9.2.0",
     "rollup-plugin-multi-entry": "^2.0.2",
     "rollup-plugin-node-resolve": "^3.4.0",
-    "rollup-plugin-typescript2": "^0.17.2"
+    "rollup-plugin-typescript2": "^0.18.0"
   },
   "devDependencies": {
     "@types/mocha": "^5.2.5",

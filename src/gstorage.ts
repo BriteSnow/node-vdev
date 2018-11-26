@@ -1,4 +1,4 @@
-import Storage = require('@google-cloud/storage');
+import { Storage, File } from '@google-cloud/storage';
 import * as nodePath from 'path';
 import { loadYaml } from './utils';
 import micromatch = require('micromatch');
@@ -40,8 +40,8 @@ export async function copy(from: PathInfo, to: PathInfo) {
 
 
 export interface DownloadEvents {
-	startFile?: (file: Storage.File) => void;
-	endFile?: (file: Storage.File) => void;
+	startFile?: (file: File) => void;
+	endFile?: (file: File) => void;
 }
 
 // TODO: needs to have destDir be dir or file. 
