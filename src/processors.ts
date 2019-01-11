@@ -138,6 +138,11 @@ export async function rollupFiles(entries: string[], distFile: string, opts: any
 				}
 			}
 		}
+		// NOTE: 2019-01-10 for now skip the plugin warning because of ONGENERATE_HOOK_DEPRECATED on rpt2
+		if (warning.code === 'PLUGIN_WARNING') {
+			skip = true;
+		}
+
 		if (!skip) {
 			console.log(`rollup warning - ${warning.message}`);
 		}
