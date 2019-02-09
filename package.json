@@ -1,6 +1,6 @@
 {
   "name": "vdev",
-  "version": "0.8.7",
+  "version": "0.8.8",
   "description": "Some devops utilities for high velocity development and deployment, support Docker, Kubernetes, Java, Node.js and web (rollup/postcss/typescript).",
   "author": "Jeremy Chone <jeremy.chone@gmail.com>",
   "main": "dist/main.js",
@@ -10,36 +10,35 @@
     "url": "git://github.com/BriteSnow/node-vdev.git"
   },
   "dependencies": {
-    "@google-cloud/storage": "^2.3.4",
+    "@google-cloud/storage": "^2.4.2",
     "@types/chokidar": "^1.7.5",
-    "@types/handlebars": "^4.0.40",
-    "@types/js-yaml": "^3.11.4",
+    "@types/js-yaml": "^3.12.0",
     "@types/micromatch": "^3.1.0",
     "@types/minimist": "^1.2.0",
-    "chokidar": "^2.0.4",
+    "chokidar": "^2.1.0",
     "fast-glob": "^2.2.6",
-    "fs-extra-plus": "^0.5.2",
-    "handlebars": "^4.0.12",
+    "fs-extra-plus": "^0.5.3",
+    "handlebars": "^4.1.0",
     "hbsp": "^0.2.2",
     "js-yaml": "^3.12.1",
     "micromatch": "^3.1.10",
     "minimist": "^1.2.0",
     "p-spawn": "^0.4.1",
-    "postcss": "^7.0.8",
+    "postcss": "^7.0.14",
     "postcss-import": "^12.0.1",
     "postcss-mixins": "^6.2.1",
     "postcss-nested": "^4.1.1",
-    "rollup": "^1.1.0",
+    "rollup": "^1.1.2",
     "rollup-plugin-commonjs": "^9.2.0",
     "rollup-plugin-multi-entry": "^2.1.0",
     "rollup-plugin-node-resolve": "^4.0.0",
-    "rollup-plugin-typescript2": "^0.18.1"
+    "rollup-plugin-typescript2": "^0.19.2"
   },
   "devDependencies": {
     "@types/mocha": "^5.2.5",
     "mocha": "^5.2.0",
-    "ts-node": "^7.0.1",
-    "typescript": "^3.2.2"
+    "ts-node": "^8.0.2",
+    "typescript": "^3.3.3"
   },
   "bin": {
     "vdev": "./dist/bin/bin-vdev.js"
