@@ -3,6 +3,7 @@ import { userInfo } from 'os';
 import { resolve } from 'path';
 import { yaml, findVal } from './utils';
 import * as fs from 'fs-extra-plus';
+import { HelperOptions } from 'handlebars';
 
 export async function render(templateString: string, data: any) {
 	const hbs = getHandlebars();
@@ -53,14 +54,14 @@ function getHandlebars() {
 		return resolve('./') + '/';
 	});
 
-	handlebars.registerHelper('assign', function (this: any, varName, varValue, options) {
+	handlebars.registerHelper('assign', function (this: any, varName: string, varValue: any, options: HelperOptions) {
 		if (!options.data.root) {
 			options.data.root = {};
 		}
 		options.data.root[varName] = varValue;
 	});
 
-	handlebars.registerHelper('assignJsonValue', function (this: any, varName, jsonFile, namePath, options) {
+	handlebars.registerHelper('assignJsonValue', function (this: any, varName: string, jsonFile: any, namePath: any, options: HelperOptions) {
 		if (!options.data.root) {
 			options.data.root = {};
 		}
