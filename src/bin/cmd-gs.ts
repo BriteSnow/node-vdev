@@ -22,8 +22,7 @@ async function ls(argv: ParsedArgs) {
 
 	files.forEach((f) => {
 		const dispName = f.name.padEnd(maxNameLength + 5);
-		const size: number = (f.metadata as any).size;
-		f.copy
+		const size: number = f.size;
 		console.log(`${dispName} ${formatSize(size)}`);
 	});
 }
@@ -47,11 +46,7 @@ async function down(argv: ParsedArgs) {
 	// TODO: need to support give a destination
 	const destDir = `${homedir()}/Downloads/`;
 
-	const r = await download(parsePathInfo(pathInfoStr), destDir, {
-		startFile: (f) => {
-			console.log(`Downloading ${f.name}`);
-		}
-	});
+	await download(parsePathInfo(pathInfoStr), destDir);
 }
 
 async function up(argv: ParsedArgs) {
