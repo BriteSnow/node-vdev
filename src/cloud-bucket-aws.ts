@@ -96,7 +96,7 @@ class AwsBucket implements Bucket {
 			const baseName = Path.basename(remotePath);
 			const destination = `${localDir}${baseName}`;
 
-			process.stdout.write(`Downloading gs://${this.name}/${af.Key} to ${destination}`);
+			process.stdout.write(`Downloading s3://${this.name}/${af.Key} to ${destination}`);
 			const params = { ...this.baseParams, ...{ Key: remotePath } };
 			try {
 				const remoteReadStream = this.s3.getObject(params).createReadStream();
