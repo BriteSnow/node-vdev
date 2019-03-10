@@ -1,27 +1,11 @@
-import { Bucket } from './cloud-bucket-base';
+import { getBucket, Bucket } from 'cloud-bucket';
 import { loadYaml } from './utils';
-import { GcpBucketCfg, getGcpBucket } from './cloud-bucket-gcp';
-import { getAwsBucket, AwsBucketCfg } from './cloud-bucket-aws';
-
 
 export type PathInfo = {
 	store: string,
 	path?: string, // path or glob
 }
 
-export async function getBucket(rawCfg: any): Promise<Bucket> {
-
-	// if has .project_id, assume GcpBucket
-	if (rawCfg.project_id) {
-		return getGcpBucket(rawCfg as GcpBucketCfg);
-	} else if (rawCfg.access_key_id) {
-		return getAwsBucket(rawCfg as AwsBucketCfg);
-	}
-	else {
-		throw new Error(`bucket config does not seem to be valid (only support Gcp and Aws for now)`);
-	}
-
-}
 
 // --------- Public list/copy/del/download/upload --------- //
 export async function list(pathInfo: PathInfo) {
@@ -33,6 +17,7 @@ export async function list(pathInfo: PathInfo) {
 export async function copy(from: PathInfo, to: PathInfo) {
 	const files = await list(from);
 	const destBucket = await getBucketFromPathInfo(to);
+	// FIXME: Need to be implemented
 }
 
 export async function download(from: PathInfo, destDir: string) {

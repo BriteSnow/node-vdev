@@ -21,8 +21,8 @@ async function ls(argv: ParsedArgs) {
 	const maxNameLength = maxPropLength(files, 'name');
 
 	files.forEach((f) => {
-		const dispName = f.name.padEnd(maxNameLength + 5);
-		const size: number = f.size;
+		const dispName = f.path.padEnd(maxNameLength + 5);
+		const size: number = (f.size != null) ? f.size : -1;
 		console.log(`${dispName} ${formatSize(size)}`);
 	});
 }

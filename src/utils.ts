@@ -37,7 +37,7 @@ export function asNames(srcNames?: string | string[] | null) {
 export async function yaml(content: string) {
 	const yamlObj = jsyaml.load(content);
 	if (!yamlObj) {
-		throw new Error(`Could not load yaml from ${path}`);
+		throw new Error(`Could not load yaml`);
 	}
 	return yamlObj;
 }

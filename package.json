@@ -10,13 +10,12 @@
     "url": "git://github.com/BriteSnow/node-vdev.git"
   },
   "dependencies": {
-    "@google-cloud/storage": "^2.4.2",
     "@types/chokidar": "^1.7.5",
     "@types/js-yaml": "^3.12.0",
     "@types/micromatch": "^3.1.0",
     "@types/minimist": "^1.2.0",
-    "aws-sdk": "^2.414.0",
     "chokidar": "^2.1.2",
+    "cloud-bucket": "^0.1.0",
     "fast-glob": "^2.2.6",
     "fs-extra-plus": "^0.5.3",
     "handlebars": "^4.1.0",
