@@ -16,7 +16,7 @@
 #### Requirements:
 
 Minimum requirement:
-- **node.js > 8**
+- **node.js > 10**
 - **Docker for mac with Kubernetes** support (current edge)
 - **Java and Maven** for java blocks
 - **Typescript installed globally** (for now) if some typescript blocks

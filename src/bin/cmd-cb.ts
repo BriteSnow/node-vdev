@@ -18,7 +18,7 @@ async function ls(argv: ParsedArgs) {
 
 	const files = await list(parsePathInfo(pathInfoStr));
 
-	const maxNameLength = maxPropLength(files, 'name');
+	const maxNameLength = maxPropLength(files, 'path');
 
 	files.forEach((f) => {
 		const dispName = f.path.padEnd(maxNameLength + 5);

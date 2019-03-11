@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import minimist = require('minimist');
 import { ParsedArgs } from 'minimist';
-import { cmds as gsCmds } from './cmd-gs';
+import { cmds as cbCmds } from './cmd-cb';
 import { cmds as buildCmds } from './cmd-build';
 import { cmds as opsCmds } from './cmd-ops';
 import { CmdMap } from '../utils';
@@ -9,7 +9,7 @@ import { CmdMap } from '../utils';
 var argv = minimist(process.argv.slice(2), { '--': true });
 
 const allCmds: { [domainName: string]: CmdMap } = {
-	gs: gsCmds,
+	cb: cbCmds,
 	build: buildCmds,
 	ops: opsCmds
 }
