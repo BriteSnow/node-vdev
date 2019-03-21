@@ -5,6 +5,7 @@ import * as fs from 'fs-extra-plus';
 //////// for Postcss
 const postcss = require("postcss");
 const processors = [
+	require("autoprefixer"),
 	require("postcss-import"),
 	require("postcss-mixins"),
 	require("postcss-nested")
