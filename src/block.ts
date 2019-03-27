@@ -1,10 +1,10 @@
-import * as fs from 'fs-extra-plus';
-import * as path from 'path';
 import * as chokidar from 'chokidar';
-import { saferRemove, now, printLog, Partial, asNames } from './utils';
-import { spawn } from 'p-spawn';
 import { async as glob } from 'fast-glob';
-import { rollupFiles, pcssFiles, tmplFiles } from './processors';
+import * as fs from 'fs-extra-plus';
+import { spawn } from 'p-spawn';
+import * as Path from 'path';
+import { pcssFiles, rollupFiles, tmplFiles } from './processors';
+import { asNames, now, Partial, printLog } from './utils';
 import { loadVdevConfig } from './vdev-config';
 
 
@@ -88,7 +88,7 @@ export async function cleanNodeFiles() {
 	for (const block of Object.values(blocks)) {
 		const dir = block.dir;
 		for (let fName of filesToDelete) {
-			const fileToDelete = path.join(dir, fName);
+			const fileToDelete = Path.join(dir, fName);
 			if ((await fs.pathExists(fileToDelete))) {
 				fs.saferRemove(fileToDelete);
 			}
@@ -180,10 +180,10 @@ export async function buildBlock(blockName: string, onlyBundleName?: string, opt
 
 async function _buildBlock(block: Block, bundle?: WebBundle, opts?: BuildOptions) {
 
-	const hasPomXml = await fs.pathExists(path.join(block.dir, 'pom.xml'));
-	const hasPackageJson = await fs.pathExists(path.join(block.dir, 'package.json'));
-	const hasDockerFile = await fs.pathExists(path.join(block.dir, 'Dockerfile'));
-	const hasTsConfig = await fs.pathExists(path.join(block.dir, 'tsconfig.json'));
+	const hasPomXml = await fs.pathExists(Path.join(block.dir, 'pom.xml'));
+	const hasPackageJson = await fs.pathExists(Path.join(block.dir, 'package.json'));
+	const hasDockerFile = await fs.pathExists(Path.join(block.dir, 'Dockerfile'));
+	const hasTsConfig = await fs.pathExists(Path.join(block.dir, 'tsconfig.json'));
 	const hasWebBundles = (block.webBundles) ? true : false;
 
 	// Note: if we have a bundleName, then, just the bundle log will be enough.
@@ -297,7 +297,7 @@ const rollupOptionsDefaults = {
  */
 async function initWebBundle(block: Block, bundle: WebBundle) {
 
-	bundle.type = path.extname(asNames(bundle.entries)[0]).substring(1);
+	bundle.type = Path.extname(asNames(bundle.entries)[0]).substring(1);
 
 	// for now, just take the block.dir
 	bundle.dir = specialPathResolve('', block.dir, bundle.dir);
@@ -374,7 +374,7 @@ export async function loadDockerBlocks(): Promise<BlockByName> {
 	const blocks = await loadBlocks();
 	const dockerBlocks: BlockByName = {};
 	for (let block of Object.values(blocks)) {
-		const hasDockerfile = await fs.pathExists(path.join(block.dir, 'Dockerfile'));
+		const hasDockerfile = await fs.pathExists(Path.join(block.dir, 'Dockerfile'));
 		if (hasDockerfile) {
 			dockerBlocks[block.name] = block;
 		}
@@ -406,7 +406,7 @@ export async function loadBlocks(): Promise<BlockByName> {
 
 		// if the block does not have a dir, then, build it with the parent one
 		if (!block.dir) {
-			block.dir = path.join(rawConfig.baseBlockDir, `${block.name}/`);
+			block.dir = Path.join(rawConfig.baseBlockDir, `${block.name}/`);
 		}
 		return block as Block;
 	}).reduce((map: { [key: string]: Block }, block: Block) => {
@@ -477,7 +477,7 @@ function replaceVersion(content: string, value: string, isHtml = false) {
 //#endregion ---------- /AppVersion Utils ---------- 
 
 async function ensureDist(bundle: WebBundle) {
-	const distDir = path.dirname(bundle.dist);
+	const distDir = Path.dirname(bundle.dist);
 	await fs.ensureDir(distDir);
 }
 
@@ -500,8 +500,8 @@ export function specialPathResolve(baseDir: string, dir: string, finalPath?: str
 		return finalPath;
 	}
 	if (finalPath.startsWith('./') || finalPath.startsWith('../')) {
-		return path.join(dir, finalPath)
+		return Path.join(dir, finalPath)
 	}
-	return path.join(baseDir, finalPath);
+	return Path.join(baseDir, finalPath);
 }
 // --------- /Private Utils --------- //

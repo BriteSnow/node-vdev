@@ -7,7 +7,7 @@ import { loadVdevConfig } from './vdev-config';
 import { render } from './renderer';
 
 import * as fs from 'fs-extra-plus';
-import * as path from 'path';
+import * as Path from 'path';
 
 
 // --------- Public Types --------- //
@@ -102,10 +102,10 @@ export async function renderRealmFile(realm: Realm, name: string): Promise<strin
 	const realmOutDir = getRealmOutDir(realm);
 
 	const srcYamlFile = getKFile(realm, name);
-	const srcYamlFileName = path.parse(srcYamlFile).base;
+	const srcYamlFileName = Path.parse(srcYamlFile).base;
 	const srcYamlContent = await fs.readFile(srcYamlFile, 'utf8');
 
-	const outYamlFile = path.join(realmOutDir, srcYamlFileName);
+	const outYamlFile = Path.join(realmOutDir, srcYamlFileName);
 
 	// render the content
 	var data = realm;
@@ -243,24 +243,24 @@ async function getAllConfigurationNames(realm: Realm): Promise<string[]> {
 
 	// return the list of names only
 	if (yamlFiles) {
-		return yamlFiles.map((f: string) => { return path.basename(f, '.yaml') });
+		return yamlFiles.map((f: string) => { return Path.basename(f, '.yaml') });
 	} else {
 		return []; // return empty list if nothing found
 	}
 }
 
 function getRealmOutDir(realm: Realm) {
-	return path.join(realm.k8sDir, '~out/', realm.name + '/');
+	return Path.join(realm.k8sDir, '~out/', realm.name + '/');
 }
 
 function getRealmSrcDir(realm: Realm) {
-	return path.join(realm.k8sDir, realm.yamlDir);
+	return Path.join(realm.k8sDir, realm.yamlDir);
 }
 
 // get the Original Kubernets Yaml file (which could be a template)
 function getKFile(realm: Realm, kName: string) {
 	let k8sDir = getRealmSrcDir(realm);
-	return path.join(k8sDir, `${kName.trim()}.yaml`);
+	return Path.join(k8sDir, `${kName.trim()}.yaml`);
 }
 
 async function cleanRealmOutDir(realm: Realm) {

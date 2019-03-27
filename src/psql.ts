@@ -1,5 +1,5 @@
 import * as fs from 'fs-extra-plus';
-import { spawn, Options as SpawnOptions } from 'p-spawn';
+import { spawn } from 'p-spawn';
 
 
 export type PsqlOptions = {

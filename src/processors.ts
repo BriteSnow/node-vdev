@@ -1,5 +1,5 @@
 import { now, saferRemove } from './utils';
-import * as path from 'path';
+import * as Path from 'path';
 import * as fs from 'fs-extra-plus';
 
 //////// for Postcss
@@ -152,7 +152,7 @@ export async function rollupFiles(entries: string[], distFile: string, opts: any
 
 	// set the default rollup output options
 	// make the name from file name "web/js/lib-bundle.js" : "lib_bundle"
-	var name = path.parse(distFile).name.replace(/\W+/g, "_");
+	var name = Path.parse(distFile).name.replace(/\W+/g, "_");
 	const outputOptions: any = {
 		file: distFile,
 		format: 'iife',

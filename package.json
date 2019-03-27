@@ -1,7 +1,7 @@
 {
   "name": "vdev",
-  "version": "0.10.0-SNAPSHOT",
-  "description": "Some devops utilities for high velocity development and deployment, support Docker, Kubernetes, Java, Node.js and web (rollup/postcss/typescript).",
+  "version": "0.10.0",
+  "description": "Some devops utilities for high velocity development and deployment, support Docker, Kubernetes, Node/TypeScript and web (rollup/postcss/typescript).",
   "author": "Jeremy Chone <jeremy.chone@gmail.com>",
   "main": "dist/main.js",
   "typings": "dist/types/main.d.ts",
@@ -45,7 +45,7 @@
   },
   "scripts": {
     "test": "TS_NODE_FILES=true ./node_modules/.bin/mocha ./test/*.spec.ts",
-    "prepare": "tsc",
+    "prepare": "rm -Rf ./dist && tsc",
     "testg": "./node_modules/.bin/mocha -g"
   },
   "license": "MIT",

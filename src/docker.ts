@@ -1,10 +1,8 @@
-import { asNames, printLog, now } from './utils';
-import { Realm, getCurrentRealm, getLocalImageName, getRemoteImageName } from './realm';
-import { Block, buildBlock, loadDockerBlocks } from './block';
-import * as fs from 'fs-extra-plus';
-import * as path from 'path';
-
 import { spawn } from 'p-spawn';
+import { Block, buildBlock, loadDockerBlocks } from './block';
+import { getLocalImageName, getRemoteImageName, Realm } from './realm';
+import { asNames, now, printLog } from './utils';
+
 
 /**
  * Push the local docker image for the service(s) to the remote (tag and push)

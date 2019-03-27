@@ -1,16 +1,14 @@
-import { homedir } from 'os';
-import { parsePathInfo, list, copy, download, upload } from '../main';
 import { ParsedArgs } from 'minimist';
+import { homedir } from 'os';
+import { copy, download, list, parsePathInfo, upload } from '../main';
 import { CmdMap } from '../utils';
 
-
-
 export const cmds: CmdMap = {
-	ls, cp, down, up
+	sls, scp, sdown, sup
 }
 
 // --------- Commands --------- //
-async function ls(argv: ParsedArgs) {
+async function sls(argv: ParsedArgs) {
 	const pathInfoStr = argv._[0];
 	if (!pathInfoStr) {
 		throw new Error(`comman 'ls' must have a path to list`);
@@ -27,7 +25,7 @@ async function ls(argv: ParsedArgs) {
 	});
 }
 
-async function cp(argv: ParsedArgs) {
+async function scp(argv: ParsedArgs) {
 	const fromPathInfo = argv._[0];
 	const toPathInfo = argv._[1];
 	if (!fromPathInfo || !toPathInfo) {
@@ -37,7 +35,7 @@ async function cp(argv: ParsedArgs) {
 
 }
 
-async function down(argv: ParsedArgs) {
+async function sdown(argv: ParsedArgs) {
 	const pathInfoStr = argv._[0];
 	if (!pathInfoStr) {
 		throw new Error(`comman 'down' must have a remote path to download`);
@@ -49,7 +47,7 @@ async function down(argv: ParsedArgs) {
 	await download(parsePathInfo(pathInfoStr), destDir);
 }
 
-async function up(argv: ParsedArgs) {
+async function sup(argv: ParsedArgs) {
 	const file = argv._[0];
 	const pathInfoStr = argv._[1];
 	if (!file || !pathInfoStr) {

@@ -1,4 +1,4 @@
-import * as path from 'path';
+import * as Path from 'path';
 import * as fs from 'fs-extra-plus';
 import * as jsyaml from 'js-yaml';
 import { ParsedArgs } from 'minimist';
@@ -49,8 +49,8 @@ export async function loadYaml(path: string) {
 
 export async function saferRemove(relPath: string, log?: boolean) {
 	log = (log !== false); // default is true
-	const baseDir = path.resolve('./');
-	const fullPath = path.resolve(relPath);
+	const baseDir = Path.resolve('./');
+	const fullPath = Path.resolve(relPath);
 	if (!fullPath.startsWith(baseDir)) {
 		throw new Error(`Path to be removed does not look safe (nothing done): ${fullPath}`);
 	}
