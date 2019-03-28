@@ -1,14 +1,14 @@
 ## About
 
-**vdev** is a set of utilities for high velocity devops focused on enabling aKubernetes centric development and operation model. 
+**vdev** is a set of utilities for high velocity devops focused on enabling aKubernetes centric development and operation model.
 
-**IMPORTANT** **vdev 0.10.0+** Command command line `./node_modules/.bin/vdev` has changed format. See below for new commands. 
+**IMPORTANT** **vdev 0.10.0+** Command command line `./node_modules/.bin/vdev` changed syntax. See below for new commands. 
 
 **NOTE**: At this point this tool is very focused on a specific set of technologies (docker/kubernetes), nodeJs/TypeScript, postgres as db, and google cloud platform). For anybody external to BriteSnow dev (or its client), it might be considered experimental as API and cli might changes. Feel free to cherry pick what you might find useful (all MIT license).
 
 **vdev** has two main constructs: 
 
-- **bocks** are module or service (when dockerfile) that get built. vDev recognize if there is a `tsconfig.json`, `package.json`, `Dockerfile` and perform the appropriate built. As of now, vdev does not have a plugin feature, but this will come in the future. Block can also have `webBundles` which can be .js, .ts, .pcss (postcss), or .tmpl (handlebars assume), and vdev will do the appropriate  compile.
+- **blocks** are module or service (when dockerfile) that get built. vDev recognize if there is a `tsconfig.json`, `package.json`, `Dockerfile` and perform the appropriate built. As of now, vdev does not have a plugin feature, but this will come in the future. Block can also have `webBundles` which can be .js, .ts, .pcss (postcss), or .tmpl (handlebars assume), and vdev will do the appropriate  compile.
 
 - **realms** are kubernetes/cluster contexts where container blocks and yaml resources get deployed to. Realm commands allow to change easily between those k8s contexts and gcp project in one command, and provide simple yet powerfull yaml handlebars templating scheme. Today supports GCP, but the goal is to add AWS soon. 
 
@@ -25,17 +25,19 @@ GCP requirement (for deployment):
 
 AWS support will be added when it will suport Kubernetes.
 
-## Quick start
+## Usage
 
 #### Setup
 
 - In the project, install vdev `npm install vdev`
 - In the root project, have a `vdev.yaml` file as below
 - Options to run the commands (both option are independent)
-  - Option 1 (npm run vdev ...): In `package.json` in the "scripts" object add `"vdev": "./node_modules/.bin/vdev"`
-    - Then can use as `npm run vdev realm` to list the realms.
-  - Option 2 (shell alias): In user `~/.profile` add a line like `alias vdev="node ./node_modules/.bin/vdev"`
-    - Then, from project root, can douse as `vdev realm` to list the realms (does not need to have option 1 to work)
+  - Option 1 (npm run vdev ...): In `package.json` in the "scripts" object add
+    - `"vdev": "./node_modules/.bin/vdev"`
+    - Then can use as `npm run vdev dbuild` to docker build the blocks.
+  - Option 2 (shell alias): In user `~/.profile` add a line like 
+    - `alias vdev="node ./node_modules/.bin/vdev"`
+    - Then, from project root, can douse as `vdev dbuild` to docker build the blocks (does not need to have option 1 to work)
 
 #### Commands example
 
