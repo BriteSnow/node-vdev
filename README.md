@@ -4,7 +4,7 @@
 
 **IMPORTANT** **vdev 0.10.0+** Command command line `./node_modules/.bin/vdev` changed syntax. See below for new commands. 
 
-**NOTE**: At this point this tool is very focused on a specific set of technologies (docker/kubernetes), nodeJs/TypeScript, postgres as db, and google cloud platform). For anybody external to BriteSnow dev (or its client), it might be considered experimental as API and cli might changes. Feel free to cherry pick what you might find useful (all MIT license).
+**NOTE**: At this point this tool is very focused on a specific set of technologies (docker/kubernetes), nodeJs/TypeScript, postgres as db, and google cloud platform). For anybody external to BriteSnow dev (or its clients), it might be considered experimental as API and cli might changes. Feel free to cherry-pick what you might find useful (all MIT license).
 
 **vdev** has two main constructs: 
 
