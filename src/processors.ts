@@ -90,20 +90,25 @@ export async function pcssFiles(entries: string[], distFile: string) {
 
 
 // --------- For Rollup (JavaScript) --------- //
-var defaultOpts = {
+interface RollupFilesOptions {
+	ts?: boolean;
+	/* {importName: globalName} - (default undefined) define the list of global names (assumed to be mapped to window._name_) */
+	globals?: { [importName: string]: string };
+	watch: boolean;
+	tsconfig?: any;
+}
+var defaultOpts: RollupFilesOptions = {
 	ts: true,
 	watch: false
 };
 
 /**
- * @param {*} entries 
- * @param {*} distFile 
  * @param {*} opts 
  *    - ts?: boolean - (default true)
- *    - globals?: {importName: globalName} - (default undefined) define the list of global names (assumed to be mapped to window._name_)
+ *    - 
  *    - watch: true | false (default false)
  */
-export async function rollupFiles(entries: string[], distFile: string, opts: any) {
+export async function rollupFiles(entries: string[], distFile: string, opts: RollupFilesOptions) {
 	opts = Object.assign({}, defaultOpts, opts);
 
 	await saferRemove("./.rpt2_cache", false);
