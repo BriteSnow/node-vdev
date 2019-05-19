@@ -37,7 +37,12 @@ export async function updateVersions(config?: any) {
 	if (!config) {
 		config = await loadVdevConfig();
 	}
-	const versionFiles = config.version.files as string[];
+	const versionFiles = (config.version && config.version.files) ? config.version.files as string[] : null;
+
+	// if we do not have version files, we skip.
+	if (versionFiles == null) {
+		return;
+	}
 
 	let newAppVersion = config.version.appVersion;
 	// if null, right now, take it from the package.json dropVersion
