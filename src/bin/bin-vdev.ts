@@ -9,7 +9,7 @@ import { cmds as realmCmds } from './cmd-realm';
 import { cmds as sCmds } from './cmd-storage';
 import { CmdMap } from '../utils';
 
-var argv = minimist(process.argv.slice(2), { '--': true });
+const argv = minimist(process.argv.slice(2), { '--': true });
 
 const allCmds: CmdMap = {
 	...buildCmds,

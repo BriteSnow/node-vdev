@@ -54,26 +54,30 @@ export async function updateVersions(config?: any) {
 
 	let firstUpdate = false; // flag that will be set 
 
-	for (let file of versionFiles) {
-		const originalContent = (await fs.readFile(file, 'utf8')).toString();
-		const isHTML = file.toLowerCase().endsWith('html');
+	try {
+		for (let file of versionFiles) {
+			const originalContent = (await fs.readFile(file, 'utf8')).toString();
+			const isHTML = file.toLowerCase().endsWith('html');
 
-		let fileAppVersion = getVersion(originalContent, isHTML);
+			let fileAppVersion = getVersion(originalContent, isHTML);
 
-		if (newAppVersion !== fileAppVersion) {
-			// On the first update needed, we start the log section for the version update
-			if (!firstUpdate) {
-				console.log(`----- Version Update: Updating new appVersion to ${newAppVersion} `);
-				firstUpdate = true;
+			if (newAppVersion !== fileAppVersion) {
+				// On the first update needed, we start the log section for the version update
+				if (!firstUpdate) {
+					console.log(`----- Version Update: Updating new appVersion to ${newAppVersion} `);
+					firstUpdate = true;
+				}
+
+				console.log(`Changing appVersion ${fileAppVersion} -> ${newAppVersion} in file: ${file}`);
+				let newContent = replaceVersion(originalContent, newAppVersion, isHTML);
+				await fs.writeFile(file, newContent, 'utf8');
+			} else {
+				// Note: for now, we do not log when nothing to do.
+				// console.log(`appVersion ${newAppVersion} match (nothing to do) in file: ${file}`);
 			}
-
-			console.log(`Changing appVersion ${fileAppVersion} -> ${newAppVersion} in file: ${file}`);
-			let newContent = replaceVersion(originalContent, newAppVersion, isHTML);
-			await fs.writeFile(file, newContent, 'utf8');
-		} else {
-			// Note: for now, we do not log when nothing to do.
-			// console.log(`appVersion ${newAppVersion} match (nothing to do) in file: ${file}`);
 		}
+	} catch (ex) {
+		throw new Error(`ERROR while doing versioning files - ${ex.message}`);
 	}
 	// if we have at least one update, we close the log section.
 	if (firstUpdate) {
