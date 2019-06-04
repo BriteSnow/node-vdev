@@ -16,9 +16,7 @@
 
 		"sourceMap": false,  // we do not need the sourcemap		
 
-		//"outDir": "./dist/", /* Redirect output structure to the directory. */
-		// FIXME: for integration testing ONLY
-		"outDir": "/Users/jeremychone/_jeremy/_projects/__cloud-starter/cloud-starter_src/node_modules/vdev/dist/",
+		"outDir": "./dist/", /* Redirect output structure to the directory. */
 
 		// To extract the maximum value from TypeScript, we use strict = true (no implicit, null check, ...)
 		"strict": true, 
