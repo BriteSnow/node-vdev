@@ -1,6 +1,6 @@
 
 import { saferRemove, asNames } from './utils';
-import { getCurrentProject, setCurrentProject } from './gcloud';
+import { getCurrentProject } from './gcloud';
 import { getCurrentContext, setCurrentContext } from './k8s';
 import { loadVdevConfig } from './vdev-config';
 
@@ -8,9 +8,12 @@ import { render } from './renderer';
 
 import * as fs from 'fs-extra-plus';
 import * as Path from 'path';
+import { callHook } from './hook';
+import { realm_init } from './hook-aws';
 
 
 // --------- Public Types --------- //
+export type RealmType = 'local' | 'gcp' | 'aws' | 'azure';
 export interface Realm {
 
 	// This is the "app name" the global name for the application (containing multiple servives)
@@ -21,8 +24,16 @@ export interface Realm {
 	/** The Kubernetes context name (this is required) */
 	context: string;
 
+	type: RealmType;
+
 	/** The Google project name */
 	project?: string;
+
+	/** 
+	 * The for type 'local' it's localhost:5000/, for 'gcr.io/${realm.project}/' for aws, has to be set.
+	 * 
+	 */
+	registry: string;
 
 	/** imageTag to be used (with the starting ':' (default to "latest") */
 	imageTag?: string;
@@ -35,25 +46,29 @@ export interface Realm {
 
 export type RealmByName = { [name: string]: Realm };
 
-export type RealmChange = { projectChanged?: boolean, contextChanged?: boolean };
+export type RealmChange = { profileChanged?: boolean, contextChanged?: boolean };
 // --------- /Public Types --------- //
 
 // --------- Public Realms APIs --------- //
 /**
- * Set/Change the current ersult (k8s context and eventual google project). Only change what is needed. 
+ * Set/Change the current (k8s context and eventual google project). Only change what is needed. 
  * @param {*} realm the realm object.
- * @return {projectChanged?: true, contextChanged?: true} return a change object with what has changed.
+ * @return {profileChanged?: true, contextChanged?: true} return a change object with what has changed.
  */
 export async function setRealm(realm: Realm) {
-	const currentRealm = await getCurrentRealm();
+	const currentRealm = await getCurrentRealm(false);
 	const change: RealmChange = {};
 
 	// NOTE: When realm.project is undefined, it will set the gclougProject to undefined, 
 	//       which is fine since we want to avoid accidental operation to the project.
 	// FIXME: Needs to handle the case where realm.project is not defined (probably remove the current google project to make sure no side effect)
-	if (realm.project && (!currentRealm || currentRealm.project !== realm.project)) {
-		change.projectChanged = true;
-		await setCurrentProject(realm.project);
+	// TODO: replace below with call hook, realm_set_begin
+
+
+	const hookReturn = await callHook(realm, 'realm_set_begin', currentRealm);
+
+	if (hookReturn != null) {
+		change.profileChanged = true;
 	}
 
 	if (!currentRealm || currentRealm.context !== realm.context) {
@@ -61,13 +76,15 @@ export async function setRealm(realm: Realm) {
 		await setCurrentContext(realm.context);
 	}
 
+
+
 	return change;
 }
 
 /**
  * Get the current Realm. Return undefined if not found
  */
-export async function getCurrentRealm() {
+export async function getCurrentRealm(check = true) {
 	const realms = await loadRealms();
 	const context = await getCurrentContext();
 
@@ -81,16 +98,14 @@ export async function getCurrentRealm() {
 		}
 	}
 
-	if (realm && realm.project) {
-		const project = await getCurrentProject();
-		if (realm.project !== project) {
-			throw new Error(`Realm ${realm.name} with Context ${context} should have project ${realm.project} but has ${project}
-				Do a 'npm realm ${realm.name}' to make sure all is set correctly`);
-		}
+	if (check && realm) {
+		await callHook(realm, 'realm_check');
 	}
 
 	return realm;
 }
+
+
 
 /**
  * Render realm yaml file.
@@ -122,18 +137,19 @@ export async function renderRealmFile(realm: Realm, name: string): Promise<strin
 
 export function formatAsTable(realms: RealmByName, currentRealm?: Realm | null) {
 	const txts = [];
-	const header = '  ' + 'REALM'.padEnd(20) + 'CONTEXT'.padEnd(60) + 'PROJECT';
+	const header = '  ' + 'REALM'.padEnd(20) + 'TYPE'.padEnd(12) + 'PROJECT/PROFILE'.padEnd(20) + 'CONTEXT';
 	txts.push(header);
 
 	const currentRealmName = (currentRealm) ? currentRealm.name : null;
 	const currentProject = (currentRealm) ? currentRealm.project : null;
 	for (let realm of Object.values(realms)) {
 		let row = (realm.name === currentRealmName) ? "* " : "  ";
-		row += realm.name.padEnd(20) + (realm.context ? realm.context : 'NO CONTEXT FOUND').padEnd(60);
-		if (realm.project) {
-			const str = realm.project + ((realm.project === currentProject) ? ' *' : '');
-			row += str;
-		}
+		row += realm.name.padEnd(20);
+		row += realm.type.padEnd(12);
+		let profile = (realm.type === 'gcp') ? realm.project : realm.profile;
+		profile = (profile == null) ? '' : profile;
+		row += profile.padEnd(20);
+		row += (realm.context ? realm.context : 'NO CONTEXT FOUND');
 		txts.push(row);
 	}
 	return txts.join('\n');
@@ -186,12 +202,17 @@ export function getLocalImageName(realm: Realm, serviceName: string) {
  * @param serviceName 
  */
 export function getRemoteImageName(realm: Realm, serviceName: string) {
-	return _getImageName(realm, `gcr.io/${realm.project}/`, serviceName);
+	return _getImageName(realm, realm.registry, serviceName);
 }
 
 function _getImageName(realm: Realm, basePath: string, serviceName: string) {
 	const tag = (realm.imageTag) ? realm.imageTag : 'latest';
-	return `${basePath}${realm.system}-${serviceName}:${tag}`;
+	const repoName = getRepositoryName(realm, serviceName);
+	return `${basePath}${repoName}:${tag}`;
+}
+
+export function getRepositoryName(realm: Realm, serviceName: string) {
+	return `${realm.system}-${serviceName}`;
 }
 
 export function assertRealm(realm?: Realm): Realm {
@@ -213,21 +234,49 @@ export async function loadRealms(): Promise<RealmByName> {
 		system: rawConfig.system,
 		k8sDir: rawConfig.k8sDir
 	}
-	// get the eventual _common object out of the 
+	// get the _common variables and delete it from the realm list
 	let _common = {};
 	if (rawRealms._common) {
 		_common = rawRealms._common;
 		delete rawRealms._common;
 	}
 
-	// great the realm object
+	// Create the realm object
 	for (let name in rawRealms) {
 		const rawRealm = rawRealms[name];
 
 		// TODO: must do a deep merge
 		const realm = { ...base, ..._common, ...rawRealm };
 
+		//// determine the type
+		let type: RealmType = 'local';
+		const context: undefined | string = realm.context;
+		if (context) {
+			if (context.startsWith('arn:aws')) {
+				type = 'aws';
+			} else if (context.startsWith('gke')) {
+				type = 'gcp';
+			}
+		}
+		realm.type = type;
+
+		//// determine registry
+		if (!realm.registry) {
+			if (type === 'local') {
+				realm.registry = 'localhost:5000/';
+			} else if (type === 'gcp') {
+				realm.registry = `gcr.io/${realm.project}/`;
+			} else if (type === 'aws') {
+				console.log(`WARNING - realm ${realm.name} of type 'aws' must have a registry property in the vdev.yaml`);
+			}
+		}
+
+		// set the name
 		realm.name = name;
+
+		// Call hook to finiish initializing the realm (i.e., realm type specific initialization)
+		await callHook(realm, 'realm_init');
+
 		realms[name] = realm;
 	}
 	return realms;

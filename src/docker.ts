@@ -2,6 +2,7 @@ import { spawn } from 'p-spawn';
 import { Block, buildBlock, loadDockerBlocks } from './block';
 import { getLocalImageName, getRemoteImageName, Realm } from './realm';
 import { asNames, now, printLog } from './utils';
+import { callHook } from './hook';
 
 
 /**
@@ -21,10 +22,10 @@ export async function push(realm: Realm, serviceNames?: string | string[]) {
 		names = Object.keys(dockerBlocks)
 	}
 
-	if (!realm.project) {
-		throw new Error(`Cannot push service image ${serviceNames} because realm ${realm.name} does not have a project`);
-	}
+	//// Call prep hook the docker push
+	await callHook(realm, "dpush_prep", names);
 
+	//// For each service, push the docker image
 	for (let serviceName of names) {
 		let sourceImage = getLocalImageName(realm, serviceName)
 		let remoteImage = getRemoteImageName(realm, serviceName);
