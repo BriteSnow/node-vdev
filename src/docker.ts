@@ -37,11 +37,17 @@ export async function push(realm: Realm, serviceNames?: string | string[]) {
 
 		// This assume gcloud has been setup on the local machine
 		// Note: gcloud requires `gcloud auth configure-docker` and just use `docker push...
-		await spawn('docker', ['push', remoteImage]);
-
-		// old way
-		//await spawn('gcloud', ['docker', '--', 'push', remoteImage]);
-
+		try {
+			await spawn('docker', ['push', remoteImage]);
+		} catch (ex) {
+			// Note: Allow the hook to eventually recorver. 
+			const passed = await callHook(realm, 'dpush_image_ex', ex, remoteImage);
+			// If the dpush_image_ex return true, means it was recovered.
+			// Otherwise there might not have been any hook or could not recover. (note that the hook could throw ex as well)
+			if (passed !== true) {
+				throw ex;
+			}
+		}
 		console.log(`----- /DONE pushing ${serviceName} : ${remoteImage} ------\n`);
 	}
 }

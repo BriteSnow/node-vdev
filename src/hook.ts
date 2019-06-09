@@ -4,7 +4,7 @@ import * as gcpHooks from './hook-gcp';
 
 
 type HookFn = (realm: Realm, ...args: any[]) => Promise<any>;
-type HookName = 'dpush_prep' | 'realm_init' | 'realm_set_begin' | 'realm_check';
+type HookName = 'dpush_prep' | 'dpush_image_ex' | 'realm_init' | 'realm_set_begin' | 'realm_check';
 
 const hooksDic: Map<RealmType, Map<HookName, HookFn>> = new Map();
 
