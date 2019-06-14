@@ -254,6 +254,7 @@ export async function loadRealms(): Promise<RealmByName> {
 		if (context) {
 			if (context.startsWith('arn:aws')) {
 				type = 'aws';
+				realm.profile = (realm.profile != null) ? realm.profile : 'default';
 			} else if (context.startsWith('gke')) {
 				type = 'gcp';
 			}
