@@ -1,5 +1,5 @@
 import * as chokidar from 'chokidar';
-import { async as glob } from 'fast-glob';
+import * as glob from 'fast-glob';
 import * as fs from 'fs-extra-plus';
 import { spawn } from 'p-spawn';
 import * as Path from 'path';
@@ -444,7 +444,7 @@ export async function loadBlock(name: string): Promise<Block> {
 
 async function resolveGlobs(globs: string | string[]) {
 	// resolve all of the entries (with glob)
-	return (await glob(globs)).map(entryItem => (typeof entryItem === 'string') ? entryItem : entryItem.path);
+	return glob(globs);
 }
 
 
