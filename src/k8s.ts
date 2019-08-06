@@ -166,13 +166,21 @@ export async function kexec(realm: Realm, serviceNamesStr: string, commandAndArg
 
 // --------- Public get/set context --------- //
 // fetch the current context
-export async function getCurrentContext() {
+export async function getCurrentContext(): Promise<string | null> {
 	// kubectl config current-context
-	const psResult = await spawn('kubectl', ['config', 'current-context'], { capture: 'stdout' });
-	return psResult.stdout.toString().trim();
+	const psResult = await spawn('kubectl', ['config', 'current-context'], { capture: ['stdout', 'stderr'], ignoreFail: true });
+	if (psResult.stderr) {
+		// console.log(`INFO: ${psResult.stderr}`);
+		return null;
+	} else {
+		return psResult.stdout.toString().trim() as string;
+	}
+
 }
 
 export async function setCurrentContext(name: string) {
+	// TODO: perhaps when null, should unset it: 'kubectl config unset current-context'
+	//       downside is that it can create some unwanted side effect, if the user has another context set
 	await spawn('kubectl', ['config', 'use-context', name]);
 }
 // --------- /Public get/set context --------- //

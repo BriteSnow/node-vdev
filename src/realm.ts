@@ -22,7 +22,7 @@ export interface Realm {
 	name: string;
 
 	/** The Kubernetes context name (this is required) */
-	context: string;
+	context: string | null;
 
 	type: RealmType;
 
@@ -62,20 +62,18 @@ export async function setRealm(realm: Realm) {
 	// NOTE: When realm.project is undefined, it will set the gclougProject to undefined, 
 	//       which is fine since we want to avoid accidental operation to the project.
 	// FIXME: Needs to handle the case where realm.project is not defined (probably remove the current google project to make sure no side effect)
-	// TODO: replace below with call hook, realm_set_begin
-
-
 	const hookReturn = await callHook(realm, 'realm_set_begin', currentRealm);
 
 	if (hookReturn != null) {
 		change.profileChanged = true;
 	}
 
-	if (!currentRealm || currentRealm.context !== realm.context) {
+	if (realm.context === null) {
+		console.log(`INFO: realm ${realm.name} does not have a kubernetes context, skipping 'kubectl config use-context ...' (current kubectl context still active)`);
+	} else if (!currentRealm || currentRealm.context !== realm.context) {
 		change.contextChanged = true;
 		await setCurrentContext(realm.context);
 	}
-
 
 
 	return change;
@@ -100,6 +98,11 @@ export async function getCurrentRealm(check = true) {
 
 	if (check && realm) {
 		await callHook(realm, 'realm_check');
+	}
+
+	// if no context matching, try get the first realm that has no context
+	if (!realm) {
+		realm = Object.values(realms).find(r => r.context === null);
 	}
 
 	return realm;
@@ -183,6 +186,13 @@ export async function templatize(realm: Realm, resourceNames?: string | string[]
  * - If no resourceNames then returns all of the resourceNames for the realm.
  */
 export async function getConfigurationNames(realm: Realm, configurationNames?: string | string[]) {
+
+	// Note: for now, we do the check if the realm has a context here, because this is called for each k*** commands
+	// TODO: Might want to make it more explicit, as validateRealmForKubectlCommand(realm)
+	if (realm.context === null) {
+		throw Error(`Realm '${realm.name}' does not have a Kubernetes context, cannot perform kubectly commands.`);
+	}
+
 	if (configurationNames) {
 		return asNames(configurationNames);
 	} else if (realm.defaultConfigurations) {
@@ -258,12 +268,14 @@ export async function loadRealms(): Promise<RealmByName> {
 			} else if (context.startsWith('gke')) {
 				type = 'gcp';
 			}
+		} else {
+			realm.context = null;
 		}
 		realm.type = type;
 
 		//// determine registry
 		if (!realm.registry) {
-			if (type === 'local') {
+			if (type === 'local' && realm.context) { // do not create localhost registry for local realm without context
 				realm.registry = 'localhost:5000/';
 			} else if (type === 'gcp') {
 				realm.registry = `gcr.io/${realm.project}/`;

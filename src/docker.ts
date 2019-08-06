@@ -22,6 +22,10 @@ export async function push(realm: Realm, serviceNames?: string | string[]) {
 		names = Object.keys(dockerBlocks)
 	}
 
+	if (realm.registry == null) {
+		throw new Error(`Realm '${realm.name}' does not have registry, cannot push docker image.`);
+	}
+
 	//// Call prep hook the docker push
 	await callHook(realm, "dpush_prep", names);
 
