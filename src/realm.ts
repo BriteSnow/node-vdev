@@ -267,6 +267,8 @@ export async function loadRealms(): Promise<RealmByName> {
 				realm.profile = (realm.profile != null) ? realm.profile : 'default';
 			} else if (context.startsWith('gke')) {
 				type = 'gcp';
+			} else if (realm.registry && realm.registry.includes('azurecr')) {
+				type = 'azure';
 			}
 		} else {
 			realm.context = null;
