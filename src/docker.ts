@@ -3,6 +3,7 @@ import { Block, buildBlock, loadDockerBlocks } from './block';
 import { getLocalImageName, getRemoteImageName, Realm } from './realm';
 import { asNames, now, printLog } from './utils';
 import { callHook } from './hook';
+import { addSessionState, hasSessionState } from './session';
 
 
 /**
@@ -82,9 +83,21 @@ export async function buildDockerImage(realm: Realm, block: Block) {
 	console.log();
 
 	// it can be use by future k8s after push
+	let status = 'DONE';
 	console.log(`------ docker push ... ${imageName}`);
-	await spawn('docker', ['push', imageName]);
-	console.log(`------ DONE - docker push ... ${imageName}`);
+	try {
+		if (!hasSessionState('NO_LOCAL_REGISTRY')) {
+			await spawn('docker', ['push', imageName]);
+		}
+	} catch (ex) {
+		addSessionState('NO_LOCAL_REGISTRY');
+	}
+	if (hasSessionState('NO_LOCAL_REGISTRY')) {
+		console.log('INFO - No Local Registry (http://localhost:5000/) - Skipping push to local registry');
+		status = "SKIPPING";
+	}
+
+	console.log(`------ ${status} - docker push ... ${imageName}`);
 
 	printLog(`\n------------ DONE - BUILDING docker image: ${imageName}`, null, start);
 }

@@ -1,6 +1,7 @@
 import { ParsedArgs } from 'minimist';
 import { asNames, assertRealm, buildDockerImage, getCurrentRealm, loadDockerBlocks, push, updateVersions } from '../main';
 import { CmdMap } from '../utils';
+import { hasSessionState } from '../session';
 
 export const cmds: CmdMap = {
 	dpush, dbuild
@@ -29,6 +30,14 @@ async function dbuild(argv: ParsedArgs) {
 		if (nameFilterSet === null || nameFilterSet.has(dockerBlock.name)) {
 			await buildDockerImage(realm, dockerBlock);
 			console.log();
+		}
+	}
+	if (hasSessionState('NO_LOCAL_REGISTRY')) {
+		if (realm.type === 'local') {
+			console.log('\n\nWARNING - No Local Registry (http://localhost:5000/) - Images were not pushed to local registry');
+			console.log(`\t  Will NOT be able to deploy to local kubernetes (e.g., 'npm run vdev kcreate' will fail)`);
+			console.log(`\n\tTips:\n\t   Start local docker registry: 'docker run -d -p 5000:5000 --restart=unless-stopped --name registry registry'`);
+			console.log(`\t   Re-run dbuild: 'npm run vdev dbuild'\n\n`);
 		}
 	}
 }
