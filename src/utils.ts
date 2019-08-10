@@ -2,7 +2,7 @@ import * as Path from 'path';
 import * as fs from 'fs-extra-plus';
 import * as jsyaml from 'js-yaml';
 import { ParsedArgs } from 'minimist';
-
+import * as stripJsonComments from 'strip-json-comments';
 
 
 // --------- Lang & Type Utils --------- //
@@ -45,6 +45,11 @@ export async function yaml(content: string) {
 export async function loadYaml(path: string) {
 	const yamlContent = await fs.readFile(path, 'utf8');
 	return yaml(yamlContent);
+}
+
+export async function readJsonFileWithComments(path: string) {
+	const content = await fs.readFile(path, 'utf8');
+	return JSON.parse(stripJsonComments(content));
 }
 
 export async function saferRemove(relPath: string, log?: boolean) {

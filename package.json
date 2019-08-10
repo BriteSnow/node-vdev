@@ -1,6 +1,6 @@
 {
   "name": "vdev",
-  "version": "0.10.19",
+  "version": "0.10.20-A",
   "description": "Some devops utilities for high velocity development and deployment, support Docker, Kubernetes, Node/TypeScript and web (rollup/postcss/typescript).",
   "author": "Jeremy Chone <jeremy.chone@gmail.com>",
   "main": "dist/main.js",
@@ -32,7 +32,8 @@
     "rollup-plugin-commonjs": "^10.0.2",
     "rollup-plugin-multi-entry": "^2.1.0",
     "rollup-plugin-node-resolve": "^5.2.0",
-    "rollup-plugin-typescript2": "^0.22.1"
+    "rollup-plugin-typescript2": "^0.22.1",
+    "strip-json-comments": "^3.0.1"
   },
   "devDependencies": {
     "@types/mocha": "^5.2.7",

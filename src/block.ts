@@ -4,7 +4,7 @@ import * as fs from 'fs-extra-plus';
 import { spawn } from 'p-spawn';
 import * as Path from 'path';
 import { pcssFiles, rollupFiles, tmplFiles } from './processors';
-import { asNames, now, Partial, printLog } from './utils';
+import { asNames, now, Partial, printLog, readJsonFileWithComments } from './utils';
 import { loadVdevConfig } from './vdev-config';
 
 
@@ -212,9 +212,9 @@ async function _buildBlock(block: Block, bundle?: WebBundle, opts?: BuildOptions
 		await buildWebBundles(block, bundle, opts);
 	}
 
-	// only run tsc if it is not a webBundle (assume rollup will take care of the ts when webBundles)
+	// run tsc (with clean dist/ folder),  if it is not a webBundle (assume rollup will take care of the ts when webBundles)
 	if (!hasWebBundles && hasTsConfig) {
-		await runTsc(block);
+		await buildTsSrc(block);
 	}
 
 	if (hasPomXml) {
@@ -232,7 +232,24 @@ async function npmInstall(block: Block) {
 	await spawn('npm', ['install'], { cwd: block.dir });
 }
 
-async function runTsc(block: Block) {
+async function buildTsSrc(block: Block) {
+	const distDirNeedsDelete = false;
+
+	const distDir = Path.join(block.dir, '/dist/');
+	const distDirExist = await fs.pathExists(distDir);
+
+	// if we have distDirExist, check that it define as compileOptions.outDir in 
+	if (distDirExist) {
+		const tsconfigObj = await readJsonFileWithComments(Path.join(block.dir, 'tsconfig.json'));
+		let outDir = tsconfigObj.compilerOptions.outDir as string | undefined | null;
+		outDir = (outDir) ? Path.join(block.dir, outDir, '/') : null; // add a ending '/' to normalize all of the dir path with ending / (join will remove duplicate)
+		if (outDir === distDir) {
+			console.log(`tsc prep - deleting tsc distDir ${distDir}`);
+			await fs.saferRemove(distDir);
+		} else {
+			console.log(`tss prep - skipping tsc distDir ${distDir} because does not match tsconfig.json compilerOptions.outDir ${outDir}`);
+		}
+	}
 	await spawn('tsc', [], { cwd: block.dir });
 }
 
