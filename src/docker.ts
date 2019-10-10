@@ -64,7 +64,7 @@ export async function buildDockerImage(realm: Realm, block: Block) {
 
 	const start = now();
 
-	console.log(`------------ BUILDING docker image: ${imageName}\n`);
+	console.log(`============ BUILDING docker image: ${imageName}\n`);
 
 	// check if this block has a dbuildDependencies
 	const dbuildDeps = asNames(block.dbuildDependencies);
@@ -99,5 +99,5 @@ export async function buildDockerImage(realm: Realm, block: Block) {
 
 	console.log(`------ ${status} - docker push ... ${imageName}`);
 
-	printLog(`\n------------ DONE - BUILDING docker image: ${imageName}`, null, start);
+	printLog(`\n============ DONE - BUILDING docker image: ${imageName}`, null, start);
 }

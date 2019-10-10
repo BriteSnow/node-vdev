@@ -250,7 +250,9 @@ async function buildTsSrc(block: Block) {
 			console.log(`tss prep - skipping tsc distDir ${distDir} because does not match tsconfig.json compilerOptions.outDir ${outDir}`);
 		}
 	}
-	await spawn('tsc', [], { cwd: block.dir });
+
+	// Assume there is a typescript installed in the root project
+	await spawn('./node_modules/.bin/tsc', ['-p', block.dir]);
 }
 
 async function runMvn(block: Block, full?: boolean) {
