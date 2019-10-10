@@ -125,7 +125,7 @@ export async function buildBlocksOrBundles(names: string[]) {
 }
 
 
-// TODO: need to add support for any blockule watch
+// TODO: needs to add support for any block rule watch
 // TODO: needs to add support for only one bundle watch
 export async function watchBlock(blockName: string) {
 	const blocks = await loadBlocks();
