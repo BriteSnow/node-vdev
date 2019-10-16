@@ -2,6 +2,7 @@ import { getConfigurationNames, renderRealmFile } from './realm';
 import { Realm } from './realm';
 import { asNames, prompt } from './utils';
 import { spawn } from 'p-spawn';
+import { GetPodResponse, PodItem, PodItemFilter, KPod, toKPod } from './k8s-types';
 
 // --------- Public create/delete/logs/restart --------- //
 export async function kcreate(realm: Realm, resourceNames?: string | string[]) {
@@ -69,31 +70,37 @@ export async function klogs(realm: Realm, resourceNames?: string | string[]) {
 	const pods = await fetchK8sObjectsByType(realm, 'pods');
 
 	for (let serviceName of names) {
-		const podNames = await getPodNames(pods, { labels: { run: `${realm.system}-${serviceName}` } });
+		const kpods = await getKPods(pods, { labels: { run: `${realm.system}-${serviceName}` } });
 
-		for (let podName of podNames) {
-			console.log(`Will show log for pod: ${podName}`);
-			const args = ['logs', '-f', podName];
-			addNamespaceIfDefined(realm, args);
-			// Note: here we do not await, because, we want to be able to launch multiple at the same time, and not be blocking.
-			spawn('kubectl', args, {
-				detached: true,
-				onStdout: function (data) {
-					// If we had a log block before, and not the same as this one, we end it. 
-					if (currentLogPodName != null && currentLogPodName !== podName) {
-						console.log('-----------\n');
+		for (const kpod of kpods) {
+			const podName = kpod.name;
+			for (const ctn of kpod.containers) {
+				const ctnName = ctn.name;
+
+				const args = ['logs', '-f', podName, '-c', ctnName];
+				addNamespaceIfDefined(realm, args);
+				console.log(`Will output logs for -> kubectl ${args.join(' ')}`);
+				// Note: here we do not await, because, we want to be able to launch multiple at the same time, and not be blocking.
+				spawn('kubectl', args, {
+					detached: true,
+					onStdout: function (data) {
+						// If we had a log block before, and not the same as this one, we end it. 
+						if (currentLogPodName != null && currentLogPodName !== podName) {
+							console.log('-----------\n');
+						}
+
+						// if the current log block is not this one, we put a new start
+						if (currentLogPodName !== podName) {
+							console.log(`----- LOG for: ${serviceName} / ${podName} / ${ctnName}`);
+							currentLogPodName = podName;
+						}
+
+						// print the info
+						process.stdout.write(data);
 					}
+				});
+			}
 
-					// if the current log block is not this one, we put a new start
-					if (currentLogPodName !== podName) {
-						console.log(`----- LOG for: ${serviceName} / ${podName} `);
-						currentLogPodName = podName;
-					}
-
-					// print the info
-					process.stdout.write(data);
-				}
-			});
 		}
 	}
 }
@@ -200,51 +207,60 @@ async function fetchK8sObjectsByType(realm: Realm, type: string) {
 	addNamespaceIfDefined(realm, args);
 	const psResult = await spawn('kubectl', args, { capture: 'stdout' });
 	const podsJsonStr = psResult.stdout.toString();
-	const result = JSON.parse(podsJsonStr);
-	return result.items || [];
+	const response = JSON.parse(podsJsonStr) as GetPodResponse;
+	return response.items || [];
 }
 
 
 // return the pod names 
-// Today filter: {imageName: string, labels: {[string]: value} (All properties of the filter must match (i.e. AND))
-function getPodNames(items: any[], filter?: { imageName?: string, labels?: { [key: string]: string } }) {
-	const names = [];
-	if (items) {
-		for (let item of items) {
-			let pass = false;
-			const itemName = item.metadata.name;
+function getPodNames(pods: PodItem[], filter?: { imageName?: string, labels?: { [key: string]: string } }) {
+	const kpods = getKPods(pods, filter);
+	return kpods.map(kpod => kpod.name);
+}
 
-			// test the filter.imageName
-			if (filter && filter.imageName) {
-				// Note: for now, just assume one container per pod, which should be the way to go anyway.
-				const itemImageName = (item.spec && item.spec.containers) ? item.spec.containers[0].image : null;
-				if (itemImageName != null && itemImageName.startsWith(filter.imageName)) {
+/**
+ * Return the list of kpods for a give list of PodItems and a optional filter.
+ * @param pods PodItem array
+ * @param filter PodItemFilter
+ */
+function getKPods(pods: PodItem[], filter?: PodItemFilter): KPod[] {
+	const kpods: KPod[] = [];
+	for (let item of pods) {
+		let pass = true;
+
+		const itemName = item.metadata.name;
+
+		// test the filter.imageName
+		if (filter && filter.imageName) {
+			// Note: for now, just assume one container per pod, which should be the way to go anyway.
+			const itemImageName = (item.spec && item.spec.containers) ? item.spec.containers[0].image : null;
+			if (itemImageName != null && itemImageName.startsWith(filter.imageName)) {
+				pass = true;
+			} else {
+				// pass = false;
+				continue; // if false, we can stop this item now.
+			}
+		}
+
+		// test the filter.labels
+		if (filter && filter.labels) {
+			for (let labelName in filter.labels) {
+				if (item.metadata.labels[labelName] === filter.labels[labelName]) {
 					pass = true;
 				} else {
 					pass = false;
-					continue; // if false, we can stop this item now.
+					continue; // if false, we can stop now
 				}
-			}
-
-			// test the filter.labels
-			if (filter && filter.labels) {
-				for (let labelName in filter.labels) {
-					if (item.metadata.labels[labelName] === filter.labels[labelName]) {
-						pass = true;
-					} else {
-						pass = false;
-						continue; // if false, we can stop now
-					}
-				}
-			}
-
-			// if pass, adde it.
-			if (pass) {
-				names.push(itemName);
 			}
 		}
+
+		// 
+		if (pass) {
+			kpods.push(toKPod(item));
+		}
 	}
-	return names;
+
+	return kpods;
 }
 
 // --------- /Private Utils --------- //
