@@ -13,9 +13,15 @@ export async function render(templateString: string, data: any) {
 }
 
 export async function loadTemplatizedYaml(path: string, data?: any) {
-	const stringContent = await fs.readFile(path, 'utf8');
-	const content = await render(stringContent, data);
-	return yaml(content);
+	try {
+		const stringContent = await fs.readFile(path, 'utf8');
+		const content = await render(stringContent, data);
+		return yaml(content);
+	} catch (ex) {
+		console.log(`ERROR - Cannot load ${resolve(path)}\n\tcause ${ex}`);
+		throw ex;
+	}
+
 }
 
 // --------- Handlebars Factory --------- //

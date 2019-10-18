@@ -1,0 +1,15 @@
+system: bb
+baseBlockDir: services/ # used as the base dir .dir (as '${baseDir}/${blockName}/'')
+k8sDir: k8s/
+
+# Augment this vdev with external vdev file
+vdevFiles: 
+  - k8s/kconfs_02/__vdev.yaml
+  - invalid-file.yaml
+
+realms: 
+  realm_01:
+    yamlDir: kconfs_01/
+    defaultConfigurations: ['srv.yaml']
+  realm_02:
+    defaultConfigurations: ['srv.yaml']

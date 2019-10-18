@@ -1,15 +1,10 @@
-
-import { saferRemove, asNames } from './utils';
-import { getCurrentProject } from './gcloud';
-import { getCurrentContext, setCurrentContext } from './k8s';
-import { loadVdevConfig } from './vdev-config';
-
-import { render } from './renderer';
-
 import * as fs from 'fs-extra-plus';
 import * as Path from 'path';
 import { callHook } from './hook';
-import { realm_init } from './hook-aws';
+import { getCurrentContext, setCurrentContext } from './k8s';
+import { render } from './renderer';
+import { asNames, saferRemove } from './utils';
+import { loadVdevConfig } from './vdev-config';
 
 
 // --------- Public Types --------- //
@@ -234,8 +229,8 @@ export function assertRealm(realm?: Realm): Realm {
 
 
 // --------- Loader --------- //
-export async function loadRealms(): Promise<RealmByName> {
-	const rawConfig = await loadVdevConfig();
+export async function loadRealms(rootDir?: string): Promise<RealmByName> {
+	const rawConfig = await loadVdevConfig(rootDir);
 
 	const rawRealms: { [name: string]: any } = rawConfig.realms;
 	const realms: RealmByName = {};
@@ -289,7 +284,8 @@ export async function loadRealms(): Promise<RealmByName> {
 		// set the name
 		realm.name = name;
 
-		// Call hook to finiish initializing the realm (i.e., realm type specific initialization)
+		// Call hook to finish initializing the realm (i.e., realm type specific initialization)
+		// TODO: not sure this is the right place to init the current realm. This is loading the realm. 
 		await callHook(realm, 'realm_init');
 
 		realms[name] = realm;

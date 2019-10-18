@@ -1,0 +1,6 @@
+
+
+realms: 
+  realm_02: 
+    yamlDir: kconfs_02/
+    defaultConfigurations: ['srv2.yaml']
