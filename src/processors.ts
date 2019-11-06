@@ -26,12 +26,12 @@ export async function tmplFiles(files: string[], distFile: string) {
 
 	await fs.saferRemove([distFile]);
 
-	var templateContent = [];
+	const templateContent = [];
 
 	for (let file of files) {
 
-		let htmlTemplate = await fs.readFile(file, "utf8");
-		let template = await hbsPrecompile(file, htmlTemplate);
+		const htmlTemplate = await fs.readFile(file, "utf8");
+		const template = await hbsPrecompile(file, htmlTemplate);
 		templateContent.push(template);
 	}
 
@@ -42,34 +42,35 @@ export async function tmplFiles(files: string[], distFile: string) {
 // --------- For postCss --------- //
 export async function pcssFiles(entries: string[], distFile: string) {
 
-	var mapFile = distFile + ".map";
+	const mapFile = distFile + ".map";
+	let pcssResult: any;
 	try {
 
 		await fs.saferRemove([distFile, mapFile]);
 
-		var processor = postcss(processors);
-		var pcssNodes = [];
+		const processor = postcss(processors);
+		const pcssNodes = [];
 
 		// we parse all of the .pcss files
 		for (let srcFile of entries) {
 			// read the file
 			let pcss = await fs.readFile(srcFile, "utf8");
 
-			var pcssNode = postcss.parse(pcss, {
+			const pcssNode = postcss.parse(pcss, {
 				from: srcFile
 			});
 			pcssNodes.push(pcssNode);
 		}
 
 		// build build the combined rootNode and its result
-		var rootNode = null;
+		let rootNode = null;
 		for (let pcssNode of pcssNodes) {
 			rootNode = (rootNode) ? rootNode.append(pcssNode) : pcssNode;
 		}
-		var rootNodeResult = rootNode.toResult();
+		const rootNodeResult = rootNode.toResult();
 
 		// we process the rootNodeResult
-		var pcssResult = await processor.process(rootNodeResult, {
+		pcssResult = await processor.process(rootNodeResult, {
 			from: "undefined",
 			to: distFile,
 			map: { inline: false }
@@ -90,14 +91,14 @@ export async function pcssFiles(entries: string[], distFile: string) {
 
 
 // --------- For Rollup (JavaScript) --------- //
-interface RollupFilesOptions {
+export interface RollupFilesOptions {
 	ts?: boolean;
 	/* {importName: globalName} - (default undefined) define the list of global names (assumed to be mapped to window._name_) */
 	globals?: { [importName: string]: string };
 	watch: boolean;
 	tsconfig?: any;
 }
-var defaultOpts: RollupFilesOptions = {
+const defaultOpts: RollupFilesOptions = {
 	ts: true,
 	watch: false
 };
@@ -114,7 +115,7 @@ export async function rollupFiles(entries: string[], distFile: string, opts: Rol
 	await saferRemove("./.rpt2_cache", false);
 
 	// delete the previous ouutput files
-	var mapFile = distFile + ".map";
+	const mapFile = distFile + ".map";
 	try {
 		// Note: Do not delete the distFile if we are in watch mode, otherwise, rollup throw an uncatched promise exception
 		if (!opts.watch) {
@@ -157,11 +158,11 @@ export async function rollupFiles(entries: string[], distFile: string, opts: Rol
 
 	// set the default rollup output options
 	// make the name from file name "web/js/lib-bundle.js" : "lib_bundle"
-	var name = Path.parse(distFile).name.replace(/\W+/g, "_");
+	const name = Path.parse(distFile).name.replace(/\W+/g, "_");
 	const outputOptions: any = {
 		file: distFile,
 		format: 'iife',
-		name: name,
+		name,
 		sourcemap: true,
 		sourcemapFile: mapFile
 	};
