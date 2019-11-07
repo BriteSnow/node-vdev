@@ -21,7 +21,12 @@ export interface Block {
 
 export interface WebBundle {
 	name: string;
+	/** The entries, support wild cards, to be compiled */
 	entries: string | string[];
+
+	/** To specify glob/files to watch in place of the entries (only used in watch mode, and not for .js/.ts) */
+	watch?: string | string[];
+
 	rollupOptions?: any;
 	dist: string; // distribution file path (from .dir)
 
@@ -139,15 +144,20 @@ export async function watchBlock(blockName: string) {
 	for (let bundle of webBundles) {
 		await initWebBundle(block, bundle);
 
-		// the rollup have a watch blocke, so we use it
+		// The rollup have a watch block, so we use it
 		if (bundle.type === 'js' || bundle.type === 'ts') {
+			if (bundle.watch) {
+				console.log(`WARNING - Ignoring '.watch' property for bundle ${bundle.name} for .js/.ts processing
+				as rollup watches dependencies. (advice: remove this .watch property for clarity)`);
+			}
 			await _buildBlock(block, bundle, { watch: true });
 		}
 
-		// otherwise, we just watch the entries, and rebuild everything
+		// Otherwise, we just watch the entries or the watch, and rebuild everything
 		else {
 			await _buildBlock(block, bundle);
-			let watcher = chokidar.watch(bundle.entries, { persistent: true });
+			const toWatch = bundle.watch ?? bundle.entries;
+			let watcher = chokidar.watch(toWatch, { persistent: true });
 			watcher.on('change', async function (filePath: string, stats) {
 				if (filePath.endsWith(`.${bundle.type}`)) {
 					await _buildBlock(block, bundle);
@@ -277,10 +287,13 @@ async function runMvn(block: Block, full?: boolean) {
 
 // --------- Private WebBundle Utils --------- //
 type WebBundler = (block: Block, webBundle: WebBundle, opts?: BuildOptions) => void;
+
+// bundlers by type (which is file extension without '.')
 const bundlers: { [type: string]: WebBundler } = {
 	ts: buildTsBundler,
 	pcss: buildPcssBundler,
 	tmpl: buildTmplBundler,
+	html: buildTmplBundler,
 	js: buildJsBundler
 }
 
@@ -332,6 +345,12 @@ async function initWebBundle(block: Block, bundle: WebBundle) {
 
 	// Make the entries relative to the Block
 	bundle.entries = asNames(bundle.entries).map((f) => specialPathResolve('', bundle.dir!, f));
+
+	// If bundle.watch, same as entries above
+	if (bundle.watch) {
+		// Make the watch relative to the Block
+		bundle.watch = asNames(bundle.watch).map((f) => specialPathResolve('', bundle.dir!, f));
+	}
 
 	// resolve the dist
 	bundle.dist = specialPathResolve('', block.baseDistDir!, bundle.dist);
