@@ -1,4 +1,4 @@
-import { now, saferRemove } from './utils';
+import { now } from './utils';
 import * as Path from 'path';
 import * as fs from 'fs-extra-plus';
 
@@ -112,16 +112,16 @@ const defaultOpts: RollupFilesOptions = {
 export async function rollupFiles(entries: string[], distFile: string, opts: RollupFilesOptions) {
 	opts = Object.assign({}, defaultOpts, opts);
 
-	await saferRemove("./.rpt2_cache", false);
+	await fs.saferRemove("./.rpt2_cache");
 
 	// delete the previous ouutput files
 	const mapFile = distFile + ".map";
 	try {
 		// Note: Do not delete the distFile if we are in watch mode, otherwise, rollup throw an uncatched promise exception
 		if (!opts.watch) {
-			await saferRemove(distFile, false);
+			await fs.saferRemove(distFile);
 		}
-		await saferRemove(mapFile, false);
+		await fs.saferRemove(mapFile);
 	} catch (ex) {
 		console.log(`Can't delete dist files`, ex);
 	}

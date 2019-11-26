@@ -104,7 +104,7 @@ export async function cleanNodeFiles() {
 		for (let fName of filesToDelete) {
 			const fileToDelete = Path.join(dir, fName);
 			if ((await fs.pathExists(fileToDelete))) {
-				fs.saferRemove(fileToDelete);
+				await fs.saferRemove(fileToDelete);
 			}
 		}
 	}

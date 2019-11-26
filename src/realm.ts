@@ -3,7 +3,7 @@ import * as Path from 'path';
 import { callHook } from './hook';
 import { getCurrentContext, setCurrentContext } from './k8s';
 import { render } from './renderer';
-import { asNames, saferRemove } from './utils';
+import { asNames } from './utils';
 import { loadVdevConfig } from './vdev-config';
 
 
@@ -324,7 +324,7 @@ function getKFile(realm: Realm, kName: string) {
 }
 
 async function cleanRealmOutDir(realm: Realm) {
-	await saferRemove(getRealmOutDir(realm));
+	await fs.saferRemove(getRealmOutDir(realm));
 }
 // --------- /Private Helpers --------- //
 

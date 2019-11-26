@@ -52,26 +52,6 @@ export async function readJsonFileWithComments(path: string) {
 	return JSON.parse(stripJsonComments(content));
 }
 
-export async function saferRemove(relPath: string, log?: boolean) {
-	log = (log !== false); // default is true
-	const baseDir = Path.resolve('./');
-	const fullPath = Path.resolve(relPath);
-	if (!fullPath.startsWith(baseDir)) {
-		throw new Error(`Path to be removed does not look safe (nothing done): ${fullPath}`);
-	}
-	const exists = await fs.pathExists(fullPath);
-	if (exists) {
-		if (log) {
-			console.log(`Deleting: ${relPath}`);
-		}
-		return fs.remove(fullPath);
-	} else {
-		if (log) {
-			console.log(`Already deleted: ${relPath}`);
-		}
-	}
-}
-
 export async function wait(ms: number) {
 	return new Promise(function (resolve) {
 		setTimeout(() => { resolve(); }, ms);
