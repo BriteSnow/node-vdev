@@ -69,12 +69,14 @@ export async function printLog(txt: string, dist: string | null, start: number) 
 
 	let msg = `${txt} - `;
 
-	if (dist) {
+	const distExist = (dist) ? await fs.pathExists(dist) : false;
+	if (dist && distExist) {
 		let size = (await fs.stat(dist)).size;
 		size = Math.round(size / 1000.0);
 		msg += `${dist} - ${timeStr} - ${size} kb`;
 	} else {
-		msg += `${timeStr}`;
+		// for now, assume that it is the watch mode that makes the file not exist yet. 
+		msg += `${dist} - ${timeStr} - ... watch mode started ...`;
 	}
 
 	console.log(msg);

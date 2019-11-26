@@ -197,12 +197,14 @@ export async function rollupFiles(entries: string[], distFile: string, opts: Rol
 			const watcher = rollup.watch(watchOptions);
 			let startTime: number;
 
-			watcher.on('event', function (evt) {
+			watcher.on('event', async function (evt) {
 				// console.log('rollup watch', evt.code, evt.output);
 				if (evt.code === 'START') {
 					startTime = now();
 				} else if (evt.code === 'END') {
-					console.log(`Recompile ${distFile} done: ${Math.round(now() - startTime)}ms`);
+					let size = (await fs.stat(distFile)).size;
+					size = Math.round(size / 1000.0);
+					console.log(`Recompile ${distFile} - ${Math.round(now() - startTime)}ms -  ${size} kb`);
 				} else if (evt.code === 'ERROR') {
 					console.log(`ERROR - Rollup/Typescript error when processing: ${distFile}`);
 					console.log("\t" + evt.error);
