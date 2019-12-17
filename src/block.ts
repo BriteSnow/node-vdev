@@ -158,6 +158,7 @@ export async function watchBlock(blockName: string) {
 			await _buildBlock(block, bundle);
 			const toWatch = bundle.watch ?? bundle.entries;
 			let watcher = chokidar.watch(toWatch, { persistent: true });
+			// TODO: Needs to use a call reducer
 			watcher.on('change', async function (filePath: string, stats) {
 				if (filePath.endsWith(`.${bundle.type}`)) {
 					await _buildBlock(block, bundle);
@@ -232,7 +233,7 @@ async function _buildBlock(block: Block, bundle?: WebBundle, opts?: BuildOptions
 	}
 
 	if (!bundle) {
-		await printLog(`------ Building Block ${block.name} DONE`, null, start);
+		await printLog(`------ Building Block ${block.name} DONE`, start);
 		console.log();
 	}
 }
@@ -281,7 +282,7 @@ async function runMvn(block: Block, full?: boolean) {
 		}
 	});
 
-	await printLog(`maven build ${full ? 'with test' : ''}`, null, start);
+	await printLog(`maven build ${full ? 'with test' : ''}`, start);
 }
 
 
@@ -316,7 +317,12 @@ async function buildWebBundles(block: Block, onlyBundle?: WebBundle, opts?: Buil
 		await ensureDist(bundle);
 		var start = now();
 		await bundlers[bundle.type!](block, bundle, opts);
-		await printLog(`Building bundle ${block.name}/${bundle.name}`, bundle.dist, start);
+		if (opts?.watch) {
+			await printLog(`Starting watch mode for ${block.name}/${bundle.name} (${bundle.dist})`, start);
+		} else {
+			await printLog(`Building bundle ${block.name}/${bundle.name}`, start, bundle.dist);
+		}
+
 	}
 }
 

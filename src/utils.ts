@@ -64,21 +64,23 @@ export function now() {
 	return hrTime[0] * 1000 + hrTime[1] / 1000000;
 }
 
-export async function printLog(txt: string, dist: string | null, start: number) {
+export async function printLog(txt: string, start: number, dist?: string | null) {
 	const timeStr = Math.round(now() - start) + 'ms';
 
 	let msg = `${txt} - `;
 
-	const distExist = (dist) ? await fs.pathExists(dist) : false;
-	if (dist && distExist) {
-		let size = (await fs.stat(dist)).size;
-		size = Math.round(size / 1000.0);
-		msg += `${dist} - ${timeStr} - ${size} kb`;
+	if (dist == null) {
+		msg += timeStr;
 	} else {
-		// for now, assume that it is the watch mode that makes the file not exist yet. 
-		msg += `${dist} - ${timeStr} - ... watch mode started ...`;
+		const distExists = await fs.pathExists(dist);
+		if (distExists) {
+			let size = (await fs.stat(dist)).size;
+			size = Math.round(size / 1000.0);
+			msg += `${dist} - ${timeStr} - ${size} kb`;
+		} else {
+			msg += `${dist} - ${timeStr} - ... watch mode started ...`
+		}
 	}
-
 	console.log(msg);
 }
 

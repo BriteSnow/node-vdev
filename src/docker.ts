@@ -99,5 +99,5 @@ export async function buildDockerImage(realm: Realm, block: Block) {
 
 	console.log(`------ ${status} - docker push ... ${imageName}`);
 
-	printLog(`\n============ DONE - BUILDING docker image: ${imageName}`, null, start);
+	printLog(`\n============ DONE - BUILDING docker image: ${imageName}`, start);
 }
