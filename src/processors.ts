@@ -208,9 +208,6 @@ export async function rollupFiles(entries: string[], distFile: string, opts: Rol
 				} else if (evt.code === 'ERROR') {
 					console.log(`ERROR - Rollup/Typescript error when processing: ${distFile}`);
 					console.log("\t" + evt.error);
-				} else if (evt.code === 'FATAL') {
-					console.log(`FATAL ERROR - Rollup/Typescript fatal error when processing ${distFile}\n
-					>>>>>>>> MUST RESTART WATCH SESSION <<<<<<<<\n\n`, evt.error);
 				}
 
 			});
