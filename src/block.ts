@@ -42,23 +42,23 @@ export async function updateVersions(config?: any) {
 	if (!config) {
 		config = await loadVdevConfig();
 	}
-	const versionFiles = (config.version && config.version.files) ? config.version.files as string[] : null;
+	const versionFiles = config.version?.files as string[] ?? null;
 
 	// if we do not have version files, we skip.
 	if (versionFiles == null) {
 		return;
 	}
 
-	let newAppVersion = config.version.appVersion;
-	// if null, right now, take it from the package.json dropVersion
-	if (newAppVersion == null) {
+	let newVersion = config.version?.value;
+
+	// if null, right now, take it from the package.json version
+	if (newVersion == null) {
 		const packageJson = await fs.readJSON('./package.json');
 		// for now, the appVersion == dropVersion (later might have a suffix)
-		newAppVersion = packageJson.dropVersion;
+		newVersion = packageJson.version;
 	}
 
 	let firstUpdate = false; // flag that will be set 
-
 	try {
 		for (let file of versionFiles) {
 			const originalContent = (await fs.readFile(file, 'utf8')).toString();
@@ -66,19 +66,18 @@ export async function updateVersions(config?: any) {
 
 			let fileAppVersion = getVersion(originalContent, isHTML);
 
-			if (newAppVersion !== fileAppVersion) {
+			if (newVersion !== fileAppVersion) {
 				// On the first update needed, we start the log section for the version update
 				if (!firstUpdate) {
-					console.log(`----- Version Update: Updating new appVersion to ${newAppVersion} `);
+					console.log(`----- Version Update: Updating '__version__ = ".."' or '?v=..' to ${newVersion} `);
 					firstUpdate = true;
 				}
 
-				console.log(`Changing appVersion ${fileAppVersion} -> ${newAppVersion} in file: ${file}`);
-				let newContent = replaceVersion(originalContent, newAppVersion, isHTML);
+				console.log(`Changing  ${fileAppVersion} -> ${newVersion} in file: ${file}`);
+				let newContent = replaceVersion(originalContent, newVersion, isHTML);
 				await fs.writeFile(file, newContent, 'utf8');
 			} else {
 				// Note: for now, we do not log when nothing to do.
-				// console.log(`appVersion ${newAppVersion} match (nothing to do) in file: ${file}`);
 			}
 		}
 	} catch (ex) {
@@ -492,9 +491,9 @@ async function resolveGlobs(globs: string | string[]) {
 }
 
 
-//#region    ---------- AppVersion Utils ---------- 
+//#region    ---------- version Utils ---------- 
 
-/** Return the first version found. For html, looks for the `src|href=....?v=___` and for other files the appVersion = ... */
+/** Return the first version found. For html, looks for the `src|href=....?v=___` and for other files the version = ... */
 function getVersion(content: string, isHtml = false) {
 	// look for the href or src ?v=...
 	if (isHtml) {
@@ -506,9 +505,9 @@ function getVersion(content: string, isHtml = false) {
 			return null;
 		}
 	}
-	// look for the appVersion = ...
+	// look for the version = ...
 	else {
-		var rx = new RegExp('appVersion' + '\\s*[=:]\\s*"(.*)"', 'i');
+		var rx = new RegExp('__version__' + '\\s*[=:]\\s*[\'"](.*)[\'"]', 'i');
 		var match = content.match(rx);
 		return (match) ? match[1] : null;
 	}
@@ -521,13 +520,13 @@ function replaceVersion(content: string, value: string, isHtml = false) {
 		return content.replace(rgxRep, '$1' + value + '$3');
 	}
 	else {
-		var rx = new RegExp('(.*' + 'appVersion' + '\\s*[=:]\\s*").*(".*)', 'i');
+		var rx = new RegExp('(.*' + '__version__' + '\\s*[=:]\\s*["\']).*([\'"].*)', 'i');
 		content = content.replace(rx, '$1' + value + '$2');
 		return content;
 	}
 }
 
-//#endregion ---------- /AppVersion Utils ---------- 
+//#endregion ---------- /version Utils ---------- 
 
 async function ensureDist(bundle: WebBundle) {
 	const distDir = Path.dirname(bundle.dist);

@@ -1,8 +1,8 @@
 
-import { loadTemplatizedYaml } from './renderer';
-import * as Path from 'path';
-import deepmerge = require('deepmerge');
 import * as fs from 'fs-extra-plus';
+import * as Path from 'path';
+import { loadTemplatizedYaml } from './renderer';
+import deepmerge = require('deepmerge');
 
 
 // --------- Public Types --------- //
@@ -13,17 +13,15 @@ export interface RawVdevConfig {
 	realms: { [name: string]: any };
 	blocks: (string | any)[];
 
-	versionFiles: string[];
+	version?: {
+		value?: string // if not set, the root package.json .version is taken
+		files?: string[]
+	}
 }
 // --------- /Public Types --------- //
 
 
 // --------- Public Loaders --------- //
-export async function loadVersionFiles() {
-	const rawConfig = await loadVdevConfig();
-	return rawConfig.versionFiles || [];
-}
-
 const overwriteMerge = (target: any[], source: any[], options?: deepmerge.Options) => source
 
 /** Parse the ./vdev.yaml and return as is */
