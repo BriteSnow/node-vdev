@@ -49,13 +49,14 @@ export async function updateVersions(config?: any) {
 		return;
 	}
 
+	// first we get try to get the version value from the vdev config
 	let newVersion = config.version?.value;
 
-	// if null, right now, take it from the package.json version
+	// if not, we infer it from the the package.json version
 	if (newVersion == null) {
 		const packageJson = await fs.readJSON('./package.json');
-		// for now, the appVersion == dropVersion (later might have a suffix)
-		newVersion = packageJson.version;
+		// for now, take first the __version__ if present (allow to have custom version scheme), then take version
+		newVersion = packageJson.__version__ ?? packageJson.version;
 	}
 
 	let firstUpdate = false; // flag that will be set 
