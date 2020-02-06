@@ -110,9 +110,10 @@ node run vdev scp dev:some/file.png prod:other/file.png
 First let's define the `vdev.yaml` at the root of the monorepo. 
 
 ```yaml
-system: halo
+system: myapp
 baseBlockDir: services/ # used as the base dir .dir (as '${baseDir}/${blockName}/'')
 k8sDir: k8s/ # root 
+imageTag: '{{__version__}}'
 
 realms:
   _common:  # common/default values that will be used for each realm
@@ -123,11 +124,15 @@ realms:
     yamlDir: dev/ # Override the common yaml dir to `k8s/dev/` 
                   #(dev has hooks for debugging and such, and commong yaml files will just add more complexity)
 
-  stage:
-    context: gke_my-gcp-project_us-west1-stage-cluster
-    project: my-gcp-project
+  stage: # for aws
+    context: arn:aws:eks:us-west-2:33333344444:cluster/eks-cluster-01
+    registry: 33333344444.dkr.ecr.us-west-2.amazonaws.com/
 
-  prod:
+  stage-azure: # for asure 
+    context: stage-asure-ref
+    registry: thirdpartyservices.azurecr.io/  
+
+  prod: # for gcp (must have project, registry inferred)
     confirmOnDelete: true
     context: gke_my-gcp-prod-project-_us-west1-prod-cluser
     project: my-gcp-prod-project
