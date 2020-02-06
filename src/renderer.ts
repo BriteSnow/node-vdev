@@ -1,13 +1,13 @@
+import * as fs from 'fs-extra-plus';
 import * as handlebars from 'handlebars';
+import { HelperOptions } from 'handlebars';
 import { userInfo } from 'os';
 import { resolve } from 'path';
-import { yaml, findVal } from './utils';
-import * as fs from 'fs-extra-plus';
-import { HelperOptions } from 'handlebars';
+import { findVal, yaml } from './utils';
 
 export async function render(templateString: string, data: any) {
 	const hbs = getHandlebars();
-	const tmpl = handlebars.compile(templateString, { noEscape: true });
+	const tmpl = hbs.compile(templateString, { noEscape: true });
 	const outContent = tmpl(data);
 	return outContent;
 }

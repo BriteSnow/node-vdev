@@ -1,4 +1,5 @@
 import { spawn } from 'p-spawn';
+import { loadBlocks } from './block';
 import { getRepositoryName, Realm } from './main';
 
 
@@ -11,10 +12,12 @@ export async function realm_init(realm: Realm) {
 	}
 }
 
-export async function dpush_prep(realm: Realm, serviceNames: []) {
-	const repoNames = serviceNames.map(sn => { return getRepositoryName(realm, sn) });
+export async function dpush_prep(realm: Realm, serviceNames: string[]) {
+	const blockByName = await loadBlocks();
 
-	const existingRepositoryNames = await getRepositoryNames(realm);
+	const repoNames = serviceNames.map(sn => getRepositoryName(blockByName[sn]));
+
+	const existingRepositoryNames = await getAwsExistingRepositoryNames(realm);
 	const missingRepositoryNames = repoNames.filter(n => !existingRepositoryNames.includes(n));
 	await createRepositories(realm, missingRepositoryNames);
 }
@@ -52,7 +55,7 @@ async function createRepositories(realm: Realm, repoNames: string[]) {
 	}
 }
 
-async function getRepositoryNames(realm: Realm) {
+async function getAwsExistingRepositoryNames(realm: Realm) {
 
 	// NOTE: Somehow even when the login has expired, this call works (it's the push that does not work)
 	const dataStr = await spawn('aws', ['ecr', 'describe-repositories', '--profile', realm.profile], { capture: 'stdout' });

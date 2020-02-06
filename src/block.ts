@@ -3,20 +3,20 @@ import * as glob from 'fast-glob';
 import * as fs from 'fs-extra-plus';
 import { spawn } from 'p-spawn';
 import * as Path from 'path';
+import { BaseObj } from './base';
 import { pcssFiles, rollupFiles, tmplFiles } from './processors';
 import { asNames, now, Partial, printLog, readJsonFileWithComments } from './utils';
 import { loadVdevConfig } from './vdev-config';
 
 
 // --------- Public Types --------- //
-export interface Block {
+export interface Block extends BaseObj {
 	name: string;
 	dir: string;
 	webBundles?: WebBundle[];
 	baseDistDir?: string;
 	dbuildDependencies?: string | string[];
 	[key: string]: any;
-
 }
 
 export interface WebBundle {
@@ -47,17 +47,10 @@ export async function updateVersions(config?: any) {
 	// if we do not have version files, we skip.
 	if (versionFiles == null) {
 		return;
-	}
 
-	// first we get try to get the version value from the vdev config
-	let newVersion = config.version?.value;
-
-	// if not, we infer it from the the package.json version
-	if (newVersion == null) {
-		const packageJson = await fs.readJSON('./package.json');
-		// for now, take first the __version__ if present (allow to have custom version scheme), then take version
-		newVersion = packageJson.__version__ ?? packageJson.version;
 	}
+	const newVersion = config.__version__;
+
 
 	let firstUpdate = false; // flag that will be set 
 	try {
@@ -440,11 +433,18 @@ export async function loadBlocks(): Promise<BlockByName> {
 
 	const rawBlocks = rawConfig.blocks;
 
+	const base = {
+		system: rawConfig.system,
+		__version__: rawConfig.__version__,
+		imageTag: rawConfig.imageTag
+	}
+
 	// build the services map from the raw services list
 	const blockByName: { [name: string]: Block } = rawBlocks.map((item: string | any) => {
 		let block: Partial<Block>;
 		let name: string;
 
+		// initialize the object
 		if (typeof item === 'string') {
 			block = {
 				name: item
@@ -456,6 +456,13 @@ export async function loadBlocks(): Promise<BlockByName> {
 			// we do a shallow clone			
 			block = { ...item };
 		}
+
+		//// add the system/version (they should not been set in the block anyway)
+		if (block.system != null || block.__version__ != null) {
+			throw new Error(`.system or .__version__ cannot be set at the block level (but found in ${block.name})`);
+		}
+		Object.assign(block, base);
+
 
 		// if the block does not have a dir, then, build it with the parent one
 		if (!block.dir) {

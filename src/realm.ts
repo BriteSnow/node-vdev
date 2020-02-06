@@ -1,5 +1,8 @@
 import * as fs from 'fs-extra-plus';
 import * as Path from 'path';
+import { BaseObj } from './base';
+import { Block } from './block';
+import { _getImageName } from './docker';
 import { callHook } from './hook';
 import { getCurrentContext, setCurrentContext } from './k8s';
 import { render } from './renderer';
@@ -8,11 +11,9 @@ import { loadVdevConfig } from './vdev-config';
 
 
 // --------- Public Types --------- //
-export type RealmType = 'local' | 'gcp' | 'aws' | 'azure';
-export interface Realm {
 
-	// This is the "app name" the global name for the application (containing multiple servives)
-	systemName: string;
+export type RealmType = 'local' | 'gcp' | 'aws' | 'azure';
+export interface Realm extends BaseObj {
 
 	name: string;
 
@@ -29,9 +30,6 @@ export interface Realm {
 	 * 
 	 */
 	registry: string;
-
-	/** imageTag to be used (with the starting ':' (default to "latest") */
-	imageTag?: string;
 
 	/** list of default defaultConfigurations (k8s yaml file names without extension) to be used if "kcreate, ..." has not services description */
 	defaultConfigurations?: string[];
@@ -197,28 +195,16 @@ export async function getConfigurationNames(realm: Realm, configurationNames?: s
 	}
 }
 
-export function getLocalImageName(realm: Realm, serviceName: string) {
-	return _getImageName(realm, 'localhost:5000/', serviceName);
-}
 
 /**
  * Note: right now assume remote is on gke cloud (gcr.io/)
  * @param realm 
  * @param serviceName 
  */
-export function getRemoteImageName(realm: Realm, serviceName: string) {
-	return _getImageName(realm, realm.registry, serviceName);
+export function getRemoteImageName(block: Block, realm: Realm) {
+	return _getImageName(block, realm.registry);
 }
 
-function _getImageName(realm: Realm, basePath: string, serviceName: string) {
-	const tag = (realm.imageTag) ? realm.imageTag : 'latest';
-	const repoName = getRepositoryName(realm, serviceName);
-	return `${basePath}${repoName}:${tag}`;
-}
-
-export function getRepositoryName(realm: Realm, serviceName: string) {
-	return `${realm.system}-${serviceName}`;
-}
 
 export function assertRealm(realm?: Realm): Realm {
 	if (!realm) {

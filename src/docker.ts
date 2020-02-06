@@ -1,9 +1,9 @@
 import { spawn } from 'p-spawn';
 import { Block, buildBlock, loadDockerBlocks } from './block';
-import { getLocalImageName, getRemoteImageName, Realm } from './realm';
-import { asNames, now, printLog } from './utils';
 import { callHook } from './hook';
+import { getRemoteImageName, Realm } from './realm';
 import { addSessionState, hasSessionState } from './session';
+import { asNames, now, printLog } from './utils';
 
 
 /**
@@ -16,6 +16,8 @@ import { addSessionState, hasSessionState } from './session';
  */
 export async function push(realm: Realm, serviceNames?: string | string[]) {
 	let names: string[];
+	const dockerBlocks = await loadDockerBlocks();
+
 	if (serviceNames) {
 		names = asNames(serviceNames);
 	} else {
@@ -32,8 +34,12 @@ export async function push(realm: Realm, serviceNames?: string | string[]) {
 
 	//// For each service, push the docker image
 	for (let serviceName of names) {
-		let sourceImage = getLocalImageName(realm, serviceName)
-		let remoteImage = getRemoteImageName(realm, serviceName);
+		const block = dockerBlocks[serviceName];
+		if (!block) {
+			throw new Error(`Block ${serviceName} not found`);
+		}
+		let sourceImage = getLocalImageName(block);
+		let remoteImage = getRemoteImageName(block, realm);
 
 		console.log(`----- Pushing service ${serviceName} : ${remoteImage}`);
 
@@ -58,9 +64,9 @@ export async function push(realm: Realm, serviceNames?: string | string[]) {
 }
 
 
-export async function buildDockerImage(realm: Realm, block: Block) {
+export async function buildDockerImage(block: Block) {
 	const dir = block.dir;
-	const imageName = getLocalImageName(realm, block.name);
+	const imageName = getLocalImageName(block);
 
 	const start = now();
 
@@ -101,3 +107,21 @@ export async function buildDockerImage(realm: Realm, block: Block) {
 
 	printLog(`\n============ DONE - BUILDING docker image: ${imageName}`, start);
 }
+
+
+//#region    ---------- docker naming ---------- 
+export function getLocalImageName(block: Block) {
+	return _getImageName(block, 'localhost:5000/');
+}
+
+export function _getImageName(block: Block, basePath: string) {
+	const tag = block.imageTag ?? 'latest';
+	const repoName = getRepositoryName(block);
+	return `${basePath}${repoName}:${tag}`;
+}
+
+export function getRepositoryName(block: Block) {
+	return `${block.system}-${block.name}`;
+}
+
+//#endregion ---------- /docker naming ---------- 

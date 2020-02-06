@@ -1,7 +1,7 @@
 import { ParsedArgs } from 'minimist';
 import { asNames, assertRealm, buildDockerImage, getCurrentRealm, loadDockerBlocks, push, updateVersions } from '../main';
-import { CmdMap } from '../utils';
 import { hasSessionState } from '../session';
+import { CmdMap } from '../utils';
 
 export const cmds: CmdMap = {
 	dpush, dbuild
@@ -28,7 +28,7 @@ async function dbuild(argv: ParsedArgs) {
 
 	for (let dockerBlock of Object.values(dockerBlocks)) {
 		if (nameFilterSet === null || nameFilterSet.has(dockerBlock.name)) {
-			await buildDockerImage(realm, dockerBlock);
+			await buildDockerImage(dockerBlock);
 			console.log();
 		}
 	}

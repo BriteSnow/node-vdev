@@ -12,9 +12,11 @@ export interface RawVdevConfig {
 	k8sDir: string;
 	realms: { [name: string]: any };
 	blocks: (string | any)[];
+	imageTag?: string;
+
+	__version__: string; // popuplate if not found
 
 	version?: {
-		value?: string // if not set, the root package.json .version is taken
 		files?: string[]
 	}
 }
@@ -28,8 +30,17 @@ const overwriteMerge = (target: any[], source: any[], options?: deepmerge.Option
 export async function loadVdevConfig(rootDir?: string): Promise<RawVdevConfig> {
 	rootDir = rootDir || "./";
 	const vdevFile = Path.join(rootDir, 'vdev.yaml');
+
+	//// Get the __version__
+	const packageJson = await fs.readJSON('./package.json');
+	let __version__ = packageJson.__version__ ?? packageJson.version;
+
+	//// build the data for the vdev template
+	// TODO: probably needs to put the other variable from the handlebars helpers here
+	const data: any = { __version__ };
+
 	// NOTE: Here we use the loadTempletezedYaml, but for now, the vdev files are not templates, just the k8s yamls are.
-	let vdevObj = await loadVdevFile(vdevFile, true);
+	let vdevObj = await loadVdevFile(vdevFile, true, data);
 
 	// TODO: probably need to do some validate here.
 
@@ -41,15 +52,17 @@ export async function loadVdevConfig(rootDir?: string): Promise<RawVdevConfig> {
 			if (exists) {
 				console.log(`INFO - Loading extra vdev file: ${subVdevFile}`);
 				try {
-					let subVdevObj = await loadVdevFile(subVdevFile);
+					let subVdevObj = await loadVdevFile(subVdevFile, false, data);
 					vdevObj = deepmerge(vdevObj, subVdevObj, { arrayMerge: overwriteMerge });
 				} catch (ex) {
 					console.log(`ERROR - Cannot load vdev files ${subVdevFile} (skipping file)\n\tCause: ${ex}`);
 				}
 			}
-
 		}
 	}
+
+	//// Allow the __version__ to be updated
+	vdevObj.__version__ = __version__;
 
 
 	return vdevObj as RawVdevConfig;
@@ -60,8 +73,8 @@ export async function loadVdevConfig(rootDir?: string): Promise<RawVdevConfig> {
  * Load a single vdev yaml file. Can be the base or a sub vdev file
  * @param base If the vdev file is the base (should have more validation)
  */
-async function loadVdevFile(vdevFile: string, base = false): Promise<any> {
-	const vdevRawObj = await loadTemplatizedYaml(vdevFile);
+async function loadVdevFile(vdevFile: string, base: boolean, data?: any): Promise<any> {
+	const vdevRawObj = await loadTemplatizedYaml(vdevFile, data);
 	// TODO: need to do validation
 	return vdevRawObj;
 }

@@ -1,4 +1,7 @@
 
+### [v0.11.2](https://github.com/britesnow/vdev/compare/v0.11.0...v0.11.1) Feb 5th 2020
+
+- Fine tune the way `__version__` is handled. and make 'dbuild' block only requirement.
 
 ### [v0.11.1](https://github.com/britesnow/vdev/compare/v0.11.0...v0.11.1) Feb 1st 2020
 
