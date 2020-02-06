@@ -115,9 +115,8 @@ export function getLocalImageName(block: Block) {
 }
 
 export function _getImageName(block: Block, basePath: string) {
-	const tag = block.imageTag ?? 'latest';
 	const repoName = getRepositoryName(block);
-	return `${basePath}${repoName}:${tag}`;
+	return `${basePath}${repoName}:${block.imageTag}`;
 }
 
 export function getRepositoryName(block: Block) {

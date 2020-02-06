@@ -12,8 +12,9 @@ export interface RawVdevConfig {
 	k8sDir: string;
 	realms: { [name: string]: any };
 	blocks: (string | any)[];
-	imageTag?: string;
 
+
+	imageTag: string; // set if not found
 	__version__: string; // popuplate if not found
 
 	version?: {
@@ -63,6 +64,7 @@ export async function loadVdevConfig(rootDir?: string): Promise<RawVdevConfig> {
 
 	//// Allow the __version__ to be updated
 	vdevObj.__version__ = __version__;
+	vdevObj.imageTag = vdevObj.imageTag ?? 'latest';
 
 
 	return vdevObj as RawVdevConfig;

@@ -8,5 +8,5 @@ export interface BaseObj {
 	__version__: string;
 
 	/** imageTag to be used (with the starting ':' (default to "latest") */
-	imageTag?: string;
+	imageTag: string;
 }

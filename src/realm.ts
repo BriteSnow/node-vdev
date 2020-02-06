@@ -239,6 +239,10 @@ export async function loadRealms(rootDir?: string): Promise<RealmByName> {
 		// TODO: must do a deep merge
 		const realm = { ...base, ..._common, ...rawRealm };
 
+		// NOTE: this is needed in realm, because ktemplate does not know if the k8s yaml is related to which block
+		// TODO: need to throw error if realm have a imageTag override
+		realm.imageTag = rawConfig.imageTag;
+
 		//// determine the type
 		let type: RealmType = 'local';
 		const context: undefined | string = realm.context;
