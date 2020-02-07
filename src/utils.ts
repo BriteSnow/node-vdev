@@ -1,8 +1,7 @@
-import * as Path from 'path';
 import * as fs from 'fs-extra-plus';
 import * as jsyaml from 'js-yaml';
 import { ParsedArgs } from 'minimist';
-import * as stripJsonComments from 'strip-json-comments';
+import stripJsonComments from 'strip-json-comments';
 
 
 // --------- Lang & Type Utils --------- //
@@ -92,7 +91,7 @@ export async function prompt(message: string) {
 		process.stdin.setEncoding('utf8');
 		process.stdin.on('data', function (text) {
 			process.stdin.pause();
-			resolve(text.trim());
+			resolve(text.toString().trim());
 		});
 	});
 }

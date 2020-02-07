@@ -1,5 +1,5 @@
 import * as chokidar from 'chokidar';
-import * as glob from 'fast-glob';
+import glob from 'fast-glob';
 import * as fs from 'fs-extra-plus';
 import { spawn } from 'p-spawn';
 import * as Path from 'path';

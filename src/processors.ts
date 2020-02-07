@@ -1,6 +1,14 @@
-import { now } from './utils';
-import * as Path from 'path';
+import rollup_cjs from '@rollup/plugin-commonjs';
+import rollup_multi from '@rollup/plugin-multi-entry';
+import rollup_re from '@rollup/plugin-node-resolve';
 import * as fs from 'fs-extra-plus';
+/////// for handlebars
+import { precompile as hbsPrecompile } from 'hbsp'; // promise style
+import * as Path from 'path';
+/////// for JS
+import * as rollup from 'rollup';
+import rollup_ts from 'rollup-plugin-typescript2'; // TODO: might want to update to @rollup/plugin-typescript (But it is a different implementation)
+import { now } from './utils';
 
 //////// for Postcss
 const postcss = require("postcss");
@@ -10,16 +18,6 @@ const processors = [
 	require("postcss-mixins"),
 	require("postcss-nested")
 ];
-
-/////// for JS
-import * as rollup from 'rollup';
-import rollup_cjs = require('rollup-plugin-commonjs');
-import rollup_re = require('rollup-plugin-node-resolve');
-import rollup_ts = require('rollup-plugin-typescript2');
-import rollup_multi = require('rollup-plugin-multi-entry');
-
-/////// for handlebars
-import { precompile as hbsPrecompile } from 'hbsp'; // promise style
 
 // --------- For Handlebars --------- //
 export async function tmplFiles(files: string[], distFile: string) {
@@ -125,6 +123,7 @@ export async function rollupFiles(entries: string[], distFile: string, opts: Rol
 	} catch (ex) {
 		console.log(`Can't delete dist files`, ex);
 	}
+
 
 	// set the default rollup input options
 	const inputOptions: any = {

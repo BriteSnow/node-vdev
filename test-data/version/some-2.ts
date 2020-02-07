@@ -1,6 +1,6 @@
 
 
 
-const __version__ = "DROP-001";
+const __version__ = "undefined";
 
 const version = __version__;
