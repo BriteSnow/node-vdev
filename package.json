@@ -1,6 +1,6 @@
 {
   "name": "vdev",
-  "version": "0.11.4",
+  "version": "0.11.5-SNAPSHOT",
   "description": "Kubernetes centric development utilities for high velocity development & deployment (Kubernetes, Docker, Node/TypeScript and web rollup/postcss/typescript).",
   "author": "Jeremy Chone <jeremy.chone@gmail.com>",
   "main": "dist/main.js",
@@ -20,27 +20,27 @@
     "chokidar": "^3.3.1",
     "cloud-bucket": "^0.2.13",
     "deepmerge": "^4.2.2",
-    "fast-glob": "^3.1.1",
+    "fast-glob": "^3.2.2",
     "fs-extra-plus": "^0.5.15",
     "handlebars": "^4.7.3",
     "hbsp": "^0.3.6",
     "js-yaml": "^3.13.1",
     "micromatch": "^4.0.2",
-    "minimist": "^1.2.0",
+    "minimist": "^1.2.3",
     "p-spawn": "^0.5.0",
-    "postcss": "^7.0.26",
+    "postcss": "^7.0.27",
     "postcss-import": "^12.0.1",
     "postcss-mixins": "^6.2.3",
     "postcss-nested": "^4.2.1",
-    "rollup": "^1.31.0",
-    "rollup-plugin-typescript2": "^0.25.3",
+    "rollup": "^1.32.1",
+    "rollup-plugin-typescript2": "^0.26.0",
     "strip-json-comments": "^3.0.1"
   },
   "devDependencies": {
-    "@types/mocha": "^7.0.1",
-    "mocha": "^7.0.1",
+    "@types/mocha": "^7.0.2",
+    "mocha": "^7.1.0",
     "ts-node": "^8.6.2",
-    "typescript": "^3.7.5"
+    "typescript": "^3.8.3"
   },
   "bin": {
     "vdev": "./dist/bin/bin-vdev.js"
