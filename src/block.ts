@@ -117,7 +117,7 @@ export async function buildBlocksOrBundles(names: string[]) {
 		for (let name of names) {
 			const blockAndBundle = name.split('/');
 			// if only .length === 1 then blockAndBundle[1] which is fine
-			await buildBlock(blockAndBundle[0], blockAndBundle[1]);
+			await buildBlock(blockAndBundle[0], { onlyBundleName: blockAndBundle[1] });
 		}
 	}
 }
@@ -164,22 +164,31 @@ export async function watchBlock(blockName: string) {
 export interface BuildOptions {
 	watch?: boolean; // for rollup bundles for now
 	full?: boolean; // for maven for including unit test (not implemented yet)
+	onlyBundleName?: string; // A>W
 }
 
+
+const blockBuilt = new Set<string>();
 /**
  * Build a and block and eventually a bundle
  * @param blockName 
  * @param opts 
  */
-export async function buildBlock(blockName: string, onlyBundleName?: string, opts?: BuildOptions) {
+export async function buildBlock(blockName: string, opts?: BuildOptions) {
 	const blockByName = await loadBlocks();
 	const block = blockByName[blockName];
+
+	if (blockBuilt.has(block.name)) {
+		console.log(`------ Block ${block.name} already built - SKIP\n`);
+		return;
+	}
 
 	if (!block) {
 		throw new Error(`No block found for blockeName ${blockName}.`);
 	}
 
 	let bundle: WebBundle | undefined;
+	const onlyBundleName = opts?.onlyBundleName;
 	if (onlyBundleName && block.webBundles) {
 		bundle = block.webBundles.find((b) => (b.name == onlyBundleName));
 		if (!bundle) {
@@ -189,13 +198,13 @@ export async function buildBlock(blockName: string, onlyBundleName?: string, opt
 	}
 
 	await _buildBlock(block, bundle, opts);
+	blockBuilt.add(block.name);
 }
 
 async function _buildBlock(block: Block, bundle?: WebBundle, opts?: BuildOptions) {
 
 	const hasPomXml = await fs.pathExists(Path.join(block.dir, 'pom.xml'));
 	const hasPackageJson = await fs.pathExists(Path.join(block.dir, 'package.json'));
-	const hasDockerFile = await fs.pathExists(Path.join(block.dir, 'Dockerfile'));
 	const hasTsConfig = await fs.pathExists(Path.join(block.dir, 'tsconfig.json'));
 	const hasWebBundles = (block.webBundles) ? true : false;
 
