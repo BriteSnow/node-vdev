@@ -1,2 +1,2 @@
 # IMPORTANT: Do not change __version__ value manually, change it in the package.json and do a "npm run version"
-__version__: "undefined"
+__version__: "DROP-001"

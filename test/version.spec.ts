@@ -20,7 +20,7 @@ describe('version', async () => {
 		await updateVersions(config);
 
 		// we reset it back
-		config.version.value = 'DROP-001';
+		config.__version__ = 'DROP-001';
 		await updateVersions(config);
 
 	});
