@@ -132,7 +132,7 @@ export async function rollupFiles(entries: string[], distFile: string, opts: Rol
 	};
 
 	// --------- Exclude 3rd Party circular Dependencies --------- //
-	const excludeCircularWarningByImporters = ['node_modules/d3'];
+	const excludeCircularWarningByImporters = ['node_modules/d3', 'node_modules/moment'];
 	inputOptions.onwarn = function onwarn(warning: any) {
 		let skip = false;
 
