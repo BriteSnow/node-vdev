@@ -1,5 +1,8 @@
-# Mac stuff, ignore
-.DS_Store
+# Default ignore all .file
+.*
+
+# except gitignor
+!.gitignore
 
 *.tgz
 

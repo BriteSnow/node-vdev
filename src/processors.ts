@@ -5,13 +5,13 @@ import * as fs from 'fs-extra-plus';
 /////// for handlebars
 import { precompile as hbsPrecompile } from 'hbsp'; // promise style
 import * as Path from 'path';
+//////// for Postcss
+import postcss from "postcss";
 /////// for JS
 import * as rollup from 'rollup';
 import rollup_ts from 'rollup-plugin-typescript2'; // TODO: might want to update to @rollup/plugin-typescript (But it is a different implementation)
 import { now } from './utils';
 
-//////// for Postcss
-const postcss = require("postcss");
 const processors = [
 	require("autoprefixer"),
 	require("postcss-import"),
@@ -65,7 +65,7 @@ export async function pcssFiles(entries: string[], distFile: string) {
 		for (let pcssNode of pcssNodes) {
 			rootNode = (rootNode) ? rootNode.append(pcssNode) : pcssNode;
 		}
-		const rootNodeResult = rootNode.toResult();
+		const rootNodeResult = rootNode!.toResult();
 
 		// we process the rootNodeResult
 		pcssResult = await processor.process(rootNodeResult, {
@@ -83,7 +83,7 @@ export async function pcssFiles(entries: string[], distFile: string) {
 
 	// we write the .css and .map files
 	await fs.writeFile(distFile, pcssResult.css, "utf8");
-	await fs.writeFile(mapFile, pcssResult.map, "utf8");
+	await fs.writeFile(mapFile, pcssResult.map.toString(), "utf8");
 }
 // --------- /For postCss --------- //
 
