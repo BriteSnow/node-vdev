@@ -4,8 +4,8 @@ import { spawn } from 'p-spawn';
 
 export type PsqlOptions = {
 	user?: string,
-	pwd?: string,
-	db?: string,
+	password?: string,
+	database?: string,
 	host?: string,
 	port?: string,
 	toConsole?: boolean;
@@ -133,8 +133,8 @@ function buildPgArgs(pgOpts: PsqlOptions): { args: string[], env: { [name: strin
 	if (pgOpts.user) {
 		args.push("-U", pgOpts.user);
 	}
-	if (pgOpts.db) {
-		args.push("-d", pgOpts.db);
+	if (pgOpts.database) {
+		args.push("-d", pgOpts.database);
 	}
 	if (pgOpts.host) {
 		args.push("-h", pgOpts.host);
@@ -143,7 +143,7 @@ function buildPgArgs(pgOpts: PsqlOptions): { args: string[], env: { [name: strin
 		args.push("-p", pgOpts.port);
 	}
 
-	const env = (pgOpts.pwd == null) ? process.env : { ...process.env, PGPASSWORD: pgOpts.pwd };
+	const env = (pgOpts.password == null) ? process.env : { ...process.env, PGPASSWORD: pgOpts.password };
 
 	return { args, env };
 }

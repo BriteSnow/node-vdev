@@ -7,7 +7,7 @@ const DB_CRED = {
 	host: 'localhost',
 	database: 'postgres',
 	user: 'postgres',
-	pwd: 'postgres'
+	password: 'postgres'
 }
 
 describe('psql', async () => {
@@ -16,7 +16,7 @@ describe('psql', async () => {
 
 	it('psql-pgStatus-exist', async () => {
 		const r = await pgStatus(DB_CRED);
-		assert.equal(r.accepting, true, 'pgStatpsql-pgTest-nonexistent-vdev_db:us.accepting');
+		assert.equal(r.accepting, true, 'psql-pgStatus-exist');
 	})
 
 	it('psql-pgStatus-nonexistent', async () => {
