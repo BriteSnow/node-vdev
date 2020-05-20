@@ -25,20 +25,20 @@ export async function psqlImport(pgOpts: PsqlOptions, filePaths: string[]): Prom
 	if (typeof filePaths === "string") {
 		filePaths = [filePaths];
 	}
-	var baseArgs = buildPgArgs(pgOpts);
+	const { args, env } = buildPgArgs(pgOpts);
 
 	var cmd = "psql";
 
 	// TODO: add the password env var.
 	for (let file of filePaths) {
-		let args = baseArgs.slice(0);
 		args.push("-f", file);
 
 		if (pgOpts.toConsole) {
 			console.log("will execute >> " + cmd + " " + args.join(" "));
 		}
 		const spawnOptions = buildSpawnOptions(pgOpts);
-		const p = await spawn(cmd, args, spawnOptions);
+
+		const p = await spawn(cmd, args, { env, ...spawnOptions });
 		const item: PsqlImportItem = { file };
 		item.stdout = p.stdout;
 		if (p.stderr) {
@@ -61,15 +61,11 @@ export async function psqlExport(pgOpts: PsqlOptions, filepath: string) {
 	var defaultArgs = ["--no-owner", "--no-acl"];
 	var baseArgs = buildPgArgs(pgOpts);
 
-	var args = [];
 	var cmd = "pg_dump";
-	args = defaultArgs.concat(baseArgs);
+	const { args, env } = buildPgArgs(pgOpts);
 
 	var fStream = fs.createWriteStream(filepath, { flags: 'w' });
 	console.log("will execute >> " + cmd + " " + args.join(" ") + "\n\t into " + filepath);
-
-	var env = Object.assign({}, process.env);
-	env.PGPASSWORD = pgOpts.pwd;
 
 	await spawn(cmd, args, {
 		env,
@@ -93,9 +89,9 @@ export async function pgTest(pgOpts: PsqlOptions): Promise<PgTestResult> {
 	// --command="SELECT version();
 
 	// var args = buildPgArgs(pgOpts);
-	var args = buildPgArgs(pgOpts);
+	const { args, env } = buildPgArgs(pgOpts);
 	args.push("--command=SELECT version()");
-	const p = await spawn('psql', args, { capture: ['stdout', 'stderr'], ignoreFail: true });
+	const p = await spawn('psql', args, { env, capture: ['stdout', 'stderr'], ignoreFail: true });
 	if (p.code === 0) {
 		return { success: true, message: p.stdout.trim() };
 	} else {
@@ -110,9 +106,9 @@ export async function pgTest(pgOpts: PsqlOptions): Promise<PgTestResult> {
 export type PgStatusResult = { accepting: boolean, message: string, code: number };
 /** Return the status of a pg database process (without the database) */
 export async function pgStatus(pgOpts: PsqlOptions): Promise<PgStatusResult> {
-	var args = buildPgArgs(pgOpts);
+	const { args, env } = buildPgArgs(pgOpts);
 	//args.push('-q'); // for the quiet mode, we just need to result code
-	const p = await spawn('pg_isready', args, { ignoreFail: true, capture: ['stdout', 'stderr'] });
+	const p = await spawn('pg_isready', args, { env, ignoreFail: true, capture: ['stdout', 'stderr'] });
 	const code = p.code;
 	const message = p.stdout.trim();
 	const accepting = (0 === p.code) ? true : false;
@@ -131,22 +127,24 @@ function buildSpawnOptions(pgOpts: PsqlOptions) {
 	return spawnOptions;
 }
 // private: Build a cmd line argument list from a pgOpts {user, db[, pwd][, host][, port: 5432]} and make it an command line arguments
-function buildPgArgs(pgOpts: PsqlOptions) {
-	var cmdArgs = [];
+function buildPgArgs(pgOpts: PsqlOptions): { args: string[], env: { [name: string]: string | undefined } } {
+	var args = [];
 
 	if (pgOpts.user) {
-		cmdArgs.push("-U", pgOpts.user);
+		args.push("-U", pgOpts.user);
 	}
 	if (pgOpts.db) {
-		cmdArgs.push("-d", pgOpts.db);
+		args.push("-d", pgOpts.db);
 	}
 	if (pgOpts.host) {
-		cmdArgs.push("-h", pgOpts.host);
+		args.push("-h", pgOpts.host);
 	}
 	if (pgOpts.port) {
-		cmdArgs.push("-p", pgOpts.port);
+		args.push("-p", pgOpts.port);
 	}
 
-	return cmdArgs;
+	const env = (pgOpts.pwd == null) ? process.env : { ...process.env, PGPASSWORD: pgOpts.pwd };
+
+	return { args, env };
 }
 // --------- /Private Utils --------- //
