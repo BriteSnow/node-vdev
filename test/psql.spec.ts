@@ -29,6 +29,13 @@ describe('psql', async () => {
 		assert.equal(r.success, false, 'pg db vdev_db');
 	});
 
+	it('psql-drop', async () => {
+		const sqlFile = 'test-data/sql/_drop-if-exists.sql';
+		const r = await psqlImport({ ...DB_CRED, ...{ toConsole: true } }, [sqlFile]);
+		assert.equal(r[0].file, sqlFile, 'r[0].file');
+	});
+
+
 	it('psql-psqlImport-00-createDb.sql', async () => {
 		const sqlFile = 'test-data/sql/00-createDb.sql';
 		const r = await psqlImport({ ...DB_CRED, ...{ toConsole: false } }, [sqlFile]);

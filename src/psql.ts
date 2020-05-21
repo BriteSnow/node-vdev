@@ -33,16 +33,20 @@ export async function psqlImport(pgOpts: PsqlOptions, filePaths: string[]): Prom
 	for (let file of filePaths) {
 		args.push("-f", file);
 
-		if (pgOpts.toConsole) {
-			console.log("will execute >> " + cmd + " " + args.join(" "));
-		}
 		const spawnOptions = buildSpawnOptions(pgOpts);
 
 		const p = await spawn(cmd, args, { env, ...spawnOptions });
 		const item: PsqlImportItem = { file };
 		item.stdout = p.stdout;
 		if (p.stderr) {
-			item.stderr = p.stderr.trim();
+			const err = p.stderr.trim();
+			let itemErr = null;
+			for (const line of err.split('\n')) {
+				if (!line.includes("NOTICE:")) {
+					itemErr = (itemErr == null) ? line : `${itemErr}\n${line}`;
+				}
+			}
+			item.stderr = itemErr ?? undefined;
 		}
 		items.push(item);
 		if (item.stderr) {

@@ -1,0 +1,2 @@
+DROP DATABASE IF EXISTS vdev_db;
+DROP USER IF EXISTS vdev_user;
