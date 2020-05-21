@@ -25,12 +25,13 @@ export async function psqlImport(pgOpts: PsqlOptions, filePaths: string[]): Prom
 	if (typeof filePaths === "string") {
 		filePaths = [filePaths];
 	}
-	const { args, env } = buildPgArgs(pgOpts);
+	const { args: baseArgs, env } = buildPgArgs(pgOpts);
 
 	var cmd = "psql";
 
 	// TODO: add the password env var.
 	for (let file of filePaths) {
+		const args = [...baseArgs]; // clone
 		args.push("-f", file);
 
 		const spawnOptions = buildSpawnOptions(pgOpts);
