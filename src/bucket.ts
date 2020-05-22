@@ -1,4 +1,4 @@
-import { getBucket, Bucket } from 'cloud-bucket';
+import { Bucket, getBucket } from 'cloud-bucket';
 import { loadYaml } from './utils';
 
 export type PathInfo = {
@@ -10,7 +10,7 @@ export type PathInfo = {
 // --------- Public list/copy/del/download/upload --------- //
 export async function list(pathInfo: PathInfo) {
 	const bucket = await getBucketFromPathInfo(pathInfo);
-	const result = await bucket.list(pathInfo.path);
+	const result = await bucket.listFiles(pathInfo.path);
 	return result;
 }
 
