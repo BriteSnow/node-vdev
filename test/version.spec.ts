@@ -17,7 +17,7 @@ describe('version', async () => {
 			}
 		};
 
-		await updateVersions(config);
+		await updateVersions({ ...config, ...{ __version__: 'DROP-002-SNAPSHOT' } });
 
 		// we reset it back
 		config.__version__ = 'DROP-001';
