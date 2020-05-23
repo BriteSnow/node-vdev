@@ -58,6 +58,7 @@ export async function pcssFiles(entries: string[], distFile: string) {
 				from: srcFile
 			});
 			pcssNodes.push(pcssNode);
+
 		}
 
 		// build build the combined rootNode and its result

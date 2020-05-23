@@ -501,9 +501,19 @@ export async function loadBlock(name: string): Promise<Block> {
 
 // --------- Private Utils --------- //
 
+/** Since 0.11.18 each string glob is sorted within their match, but if globs is an array, the order of each result glob result is preserved. */
 async function resolveGlobs(globs: string | string[]) {
-	// resolve all of the entries (with glob)
-	return fs.glob(globs);
+	if (typeof globs === 'string') {
+		return fs.glob(globs);
+	} else {
+		const lists: string[][] = [];
+		for (const glob of globs) {
+			const list = await fs.glob(glob);
+			lists.push(list);
+		}
+		return lists.flat();
+	}
+
 }
 
 

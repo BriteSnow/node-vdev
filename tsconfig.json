@@ -4,8 +4,8 @@
 
 {
 	"compilerOptions": {
-		// for node.js 10+
-		"target": "es2018",
+		// for node.js 12+
+		"target": "es2019",
 
 		// node.js does not support es2015, so, we tell typescript to output commonjs (we do not use rollup for server, just ts-node)
 		"module": "commonjs",
