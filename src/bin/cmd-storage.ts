@@ -1,5 +1,4 @@
 import { ParsedArgs } from 'minimist';
-import { homedir } from 'os';
 import { copy, download, list, parsePathInfo, upload } from '../main';
 import { CmdMap } from '../utils';
 
@@ -41,8 +40,8 @@ async function sdown(argv: ParsedArgs) {
 		throw new Error(`comman 'down' must have a remote path to download`);
 	}
 
-	// TODO: need to support give a destination
-	const destDir = `${homedir()}/Downloads/`;
+	// Changed to download to current folder
+	const destDir = `./`;
 
 	await download(parsePathInfo(pathInfoStr), destDir);
 }
