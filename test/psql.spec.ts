@@ -1,7 +1,7 @@
 
-import * as assert from 'assert';
+import { deepStrictEqual as equal } from 'assert';
 import { spawn } from 'p-spawn';
-import { pgStatus, pgTest, psqlImport } from '../src/psql';
+import { pgStatus, pgTest, psqlCommand, psqlImport } from '../src/psql';
 
 const DB_CRED = {
 	host: 'localhost',
@@ -16,35 +16,40 @@ describe('psql', async () => {
 
 	it('psql-pgStatus-exist', async () => {
 		const r = await pgStatus(DB_CRED);
-		assert.equal(r.accepting, true, 'psql-pgStatus-exist');
+		equal(r.accepting, true, 'psql-pgStatus-exist');
 	})
 
 	it('psql-pgStatus-nonexistent', async () => {
 		const r = await pgStatus({ host: 'nonexistent' });
-		assert.equal(r.accepting, false, 'pgStatus.accepting')
+		equal(r.accepting, false, 'pgStatus.accepting')
 	});
 
 	it('psql-pgTest-nonexistent', async () => {
 		const r = await pgTest({ ...DB_CRED, ...{ host: 'noexistent_db' } });
-		assert.equal(r.success, false, 'pg db vdev_db');
+		equal(r.success, false, 'pg db vdev_db');
 	});
 
 	it('psql-drop', async () => {
 		const sqlFile = 'test-data/sql/_drop-if-exists.sql';
 		const r = await psqlImport({ ...DB_CRED, ...{ toConsole: true } }, [sqlFile]);
-		assert.equal(r[0].file, sqlFile, 'r[0].file');
+		equal(r[0].file, sqlFile, 'r[0].file');
 	});
 
 
 	it('psql-psqlImport-00-createDb.sql', async () => {
 		const sqlFile = 'test-data/sql/00-createDb.sql';
 		const r = await psqlImport({ ...DB_CRED, ...{ toConsole: false } }, [sqlFile]);
-		assert.equal(r[0].file, sqlFile, 'r[0].file');
+		equal(r[0].file, sqlFile, 'r[0].file');
+	});
+
+	it('psql-psqlCommand', async () => {
+		const r = await psqlCommand({ ...DB_CRED, ...{ toConsole: false } }, 'SELECT version()');
+		equal(r.includes('PostgreSQL'), true, 'contains PostgreSQL');
 	});
 
 	it('psql-pgTest-vdev_db', async () => {
 		const r = await pgTest(DB_CRED);
-		assert.equal(r.success, true, 'pg db vdev_db');
+		equal(r.success, true, 'pg db vdev_db');
 	});
 
 
@@ -52,10 +57,10 @@ describe('psql', async () => {
 		const sqlFile = 'test-data/sql/00-createDb.sql';
 		try {
 			const r = await psqlImport({ ...DB_CRED, ...{ toConsole: false } }, [sqlFile]);
-			assert.equal(r[0].file, sqlFile, 'r[0].file');
+			equal(r[0].file, sqlFile, 'r[0].file');
 		} catch (ex) {
-			assert.equal(ex.items.length, 1);
-			assert.equal(ex.message.includes('already exists'), true);
+			equal(ex.items.length, 1);
+			equal(ex.message.includes('already exists'), true);
 		}
 	});
 

@@ -25,32 +25,18 @@ export async function psqlImport(pgOpts: PsqlOptions, filePaths: string[]): Prom
 	if (typeof filePaths === "string") {
 		filePaths = [filePaths];
 	}
-	const { args: baseArgs, env } = buildPgArgs(pgOpts);
 
-	var cmd = "psql";
-
-	// TODO: add the password env var.
 	for (let file of filePaths) {
-		const args = [...baseArgs]; // clone
-		args.push("-f", file);
 
-		const spawnOptions = buildSpawnOptions(pgOpts);
-
-		const p = await spawn(cmd, args, { env, ...spawnOptions });
 		const item: PsqlImportItem = { file };
-		item.stdout = p.stdout;
-		if (p.stderr) {
-			const err = p.stderr.trim();
-			let itemErr = null;
-			for (const line of err.split('\n')) {
-				if (!line.includes("NOTICE:")) {
-					itemErr = (itemErr == null) ? line : `${itemErr}\n${line}`;
-				}
-			}
-			item.stderr = itemErr ?? undefined;
-		}
+
+		const { stdout, stderr } = await execPsql(pgOpts, ["-f", file])
+
+		item.stdout = stdout;
+		item.stderr = stderr;
 		items.push(item);
-		if (item.stderr) {
+
+		if (stderr) {
 			const err: Error & { items?: PsqlImportItem[] } = new Error(`psqlImport ERROR for file ${file}:\n${item.stderr}`);
 			err.items = items;
 			throw err;
@@ -64,10 +50,10 @@ export async function psqlImport(pgOpts: PsqlOptions, filePaths: string[]): Prom
 // pgdump with no-owner, no-acl
 export async function psqlExport(pgOpts: PsqlOptions, filepath: string) {
 	var defaultArgs = ["--no-owner", "--no-acl"];
-	var baseArgs = buildPgArgs(pgOpts);
 
 	var cmd = "pg_dump";
 	const { args, env } = buildPgArgs(pgOpts);
+	args.push.apply(args, defaultArgs);
 
 	var fStream = fs.createWriteStream(filepath, { flags: 'w' });
 	console.log("will execute >> " + cmd + " " + args.join(" ") + "\n\t into " + filepath);
@@ -80,6 +66,19 @@ export async function psqlExport(pgOpts: PsqlOptions, filepath: string) {
 	});
 
 }
+
+export async function psqlCommand(pgOpts: PsqlOptions, command: string): Promise<string> {
+
+	const { stdout, stderr } = await execPsql({ ...pgOpts, toConsole: true }, [`--command=${command}`]);
+
+	if (stderr) {
+		throw Error(`ERROR - cannot psqlCommand "${command}" because ${stderr}`);
+	}
+
+	return stdout;
+
+}
+
 // --------- /psql public API --------- //
 
 // --------- Utils public API --------- //
@@ -115,7 +114,7 @@ export async function pgStatus(pgOpts: PsqlOptions): Promise<PgStatusResult> {
 	//args.push('-q'); // for the quiet mode, we just need to result code
 	const p = await spawn('pg_isready', args, { env, ignoreFail: true, capture: ['stdout', 'stderr'] });
 	const code = p.code;
-	const message = p.stdout.trim();
+	const message = p.stdout?.trim();
 	const accepting = (0 === p.code) ? true : false;
 	return { accepting, message, code };
 }
@@ -124,6 +123,33 @@ export async function pgStatus(pgOpts: PsqlOptions): Promise<PgStatusResult> {
 
 
 // --------- Private Utils --------- //
+async function execPsql(pgOpts: PsqlOptions, args: string[]): Promise<{ stdout: string, stderr: string }> {
+
+	const { args: baseArgs, env } = buildPgArgs(pgOpts);
+
+	// add the args at the end
+	args = [...baseArgs, ...args];
+
+	const spawnOptions = buildSpawnOptions(pgOpts);
+
+	const spawnResult = await spawn('psql', args, { env, ...spawnOptions, ignoreFail: true });
+
+	let { stdout, stderr } = spawnResult;
+
+	if (stderr) {
+		const err = stderr.trim();
+		let itemErr = null;
+		for (const line of err.split('\n')) {
+			if (!line.includes("NOTICE:")) {
+				itemErr = (itemErr == null) ? line : `${itemErr}\n${line}`;
+			}
+		}
+		stderr = itemErr ?? undefined;
+	}
+
+	return { stdout, stderr };
+}
+
 function buildSpawnOptions(pgOpts: PsqlOptions) {
 	let spawnOptions: any = { capture: ['stdout', 'stderr'] };
 	if (pgOpts.toConsole) {
