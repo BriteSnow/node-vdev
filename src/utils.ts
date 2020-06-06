@@ -2,6 +2,7 @@ import * as fs from 'fs-extra-plus';
 import * as jsyaml from 'js-yaml';
 import { ParsedArgs } from 'minimist';
 import stripJsonComments from 'strip-json-comments';
+import { split } from 'utils-min';
 
 
 // --------- Lang & Type Utils --------- //
@@ -21,7 +22,7 @@ export type CmdMap = { [fnName: string]: (miniArgv: ParsedArgs, rawArgv: string[
 export function asNames(srcNames?: string | string[] | null) {
 	if (srcNames) {
 		if (typeof srcNames === 'string') {
-			return srcNames.split(',').map((s) => s.trim());
+			return split(srcNames, ',');
 		} else {
 			return srcNames;
 		}
@@ -51,11 +52,6 @@ export async function readJsonFileWithComments(path: string) {
 	return JSON.parse(stripJsonComments(content));
 }
 
-export async function wait(ms: number) {
-	return new Promise(function (resolve) {
-		setTimeout(() => { resolve(); }, ms);
-	});
-}
 
 // return now in milliseconds using high precision
 export function now() {

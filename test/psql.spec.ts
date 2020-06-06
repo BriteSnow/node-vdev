@@ -1,6 +1,7 @@
 
 import { deepStrictEqual as equal } from 'assert';
 import { spawn } from 'p-spawn';
+import { wait } from 'utils-min';
 import { pgStatus, pgTest, psqlCommand, psqlImport } from '../src/psql';
 
 const DB_CRED = {
@@ -66,11 +67,6 @@ describe('psql', async () => {
 
 });
 
-async function wait(ms: number) {
-	return new Promise(function (resolve, reject) {
-		setTimeout(function () { resolve(); }, ms);
-	});
-}
 
 
 
