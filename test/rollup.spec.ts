@@ -6,7 +6,7 @@ describe('rollup', async () => {
 	it('rollup-ts', async function () {
 		// this.timeout(5000); // not needed for now
 
-		const distDir = 'test-data/rollup/~out';
+		const distDir = 'test-data/rollup/.out';
 		const distFile = distDir + '/bundle.js';
 
 		await saferRemove(distDir);

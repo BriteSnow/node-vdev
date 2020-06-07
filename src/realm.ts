@@ -300,7 +300,7 @@ async function getAllConfigurationNames(realm: Realm): Promise<string[]> {
 }
 
 function getRealmOutDir(realm: Realm) {
-	return Path.join(realm.k8sDir, '~out/', realm.name + '/');
+	return Path.join(realm.k8sDir, '.out/', realm.name + '/');
 }
 
 function getRealmSrcDir(realm: Realm) {

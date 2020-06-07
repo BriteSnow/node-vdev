@@ -78,7 +78,7 @@ node run vdev klogs web-server,agent
 ## Kubernetes server/service restart. Will call the `/service/restart.sh` of one or more services (not recreating/restart the pod, just call the scripts `/service/restart.sh`)
 node run vdev krestart 
 
-## (internal) just run the templating on a k8s configuration files and output it in the ~out/_realm_/ folder for inspection or manual manipulation
+## (internal) just run the templating on a k8s configuration files and output it in the .out/_realm_/ folder for inspection or manual manipulation
 node run vdev ktemplate
 
 # --- Misc
