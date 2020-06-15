@@ -11,16 +11,17 @@ const DB_CRED = {
 	password: 'postgres'
 }
 
-describe('psql', async () => {
+describe('psql', async function () {
 	before(setupPgImage);
 	after(closePgImage);
 
-	it('psql-pgStatus-exist', async () => {
+	it('psql-pgStatus-exist', async function () {
 		const r = await pgStatus(DB_CRED);
 		equal(r.accepting, true, 'psql-pgStatus-exist');
 	})
 
-	it('psql-pgStatus-nonexistent', async () => {
+	it('psql-pgStatus-nonexistent', async function () {
+		this.timeout(5000); // take a longer time since wait for hostname to respond
 		const r = await pgStatus({ host: 'nonexistent' });
 		equal(r.accepting, false, 'pgStatus.accepting')
 	});
@@ -73,12 +74,12 @@ describe('psql', async () => {
 // --------- Private Utils --------- //
 async function setupPgImage(this: any) {
 	this.timeout(5000);
-	await spawn('docker', ['run', '-d', '-p', '5432:5432', '-e', 'POSTGRES_PASSWORD=postgres', '--name', 'vdev-pg', 'postgres:12'], { capture: 'stdout' });
-	await wait(1000);
+	await spawn('docker', ['run', '--rm', '-d', '-p', '5432:5432', '-e', 'POSTGRES_PASSWORD=postgres', '--name', 'vdev-pg', 'postgres:12'], { capture: 'stdout' });
+	await wait(3000);
 }
 async function closePgImage() {
-	await wait(123);
+	await wait(500);
 	await spawn('docker', ['stop', 'vdev-pg'], { capture: 'stdout' });
-	await spawn('docker', ['rm', 'vdev-pg'], { capture: 'stdout' });
+	await wait(500);
 }
 // --------- /Private Utils --------- //
