@@ -1,7 +1,8 @@
 import rollup_cjs from '@rollup/plugin-commonjs';
 import rollup_multi from '@rollup/plugin-multi-entry';
 import rollup_re from '@rollup/plugin-node-resolve';
-import * as fs from 'fs-extra-plus';
+import { saferRemove } from 'backlib';
+import * as fs from 'fs-extra';
 /////// for handlebars
 import { precompile as hbsPrecompile } from 'hbsp'; // promise style
 import * as Path from 'path';
@@ -22,7 +23,7 @@ const processors = [
 // --------- For Handlebars --------- //
 export async function tmplFiles(files: string[], distFile: string) {
 
-	await fs.saferRemove([distFile]);
+	await saferRemove([distFile]);
 
 	const templateContent = [];
 
@@ -44,7 +45,7 @@ export async function pcssFiles(entries: string[], distFile: string) {
 	let pcssResult: any;
 	try {
 
-		await fs.saferRemove([distFile, mapFile]);
+		await saferRemove([distFile, mapFile]);
 
 		const processor = postcss(processors);
 		const pcssNodes = [];
@@ -111,16 +112,16 @@ const defaultOpts: RollupFilesOptions = {
 export async function rollupFiles(entries: string[], distFile: string, opts: RollupFilesOptions) {
 	opts = Object.assign({}, defaultOpts, opts);
 
-	await fs.saferRemove("./.rpt2_cache");
+	await saferRemove("./.rpt2_cache");
 
 	// delete the previous ouutput files
 	const mapFile = distFile + ".map";
 	try {
 		// Note: Do not delete the distFile if we are in watch mode, otherwise, rollup throw an uncatched promise exception
 		if (!opts.watch) {
-			await fs.saferRemove(distFile);
+			await saferRemove(distFile);
 		}
-		await fs.saferRemove(mapFile);
+		await saferRemove(mapFile);
 	} catch (ex) {
 		console.log(`Can't delete dist files`, ex);
 	}

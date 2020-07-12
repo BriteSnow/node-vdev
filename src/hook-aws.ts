@@ -29,7 +29,7 @@ export async function dpush_image_ex(realm: Realm, ex: any, remoteImage: string)
 	console.log(`dpush - recovering - first docker dpush to ${remoteImage} failed, trying to recover`);
 	// aws ecr get-login --no-include-email
 	const reloginCmd = await spawn('aws', ['ecr', 'get-login', '--no-include-email', '--profile', realm.profile], { capture: 'stdout' });
-	const reloginArg = reloginCmd.stdout.trim().split(' ');
+	const reloginArg = reloginCmd.stdout!.trim().split(' ');
 	reloginArg.shift(); // remove the 'docker' first item.
 	try {
 		const relogin = await spawn('docker', reloginArg, { capture: 'stdout' });
@@ -59,7 +59,7 @@ async function getAwsExistingRepositoryNames(realm: Realm) {
 
 	// NOTE: Somehow even when the login has expired, this call works (it's the push that does not work)
 	const dataStr = await spawn('aws', ['ecr', 'describe-repositories', '--profile', realm.profile], { capture: 'stdout' });
-	const repositories = JSON.parse(dataStr.stdout.trim()).repositories;
+	const repositories = JSON.parse(dataStr.stdout!.trim()).repositories;
 	if (repositories) {
 		return repositories.map((r: any) => r.repositoryName);
 	} else {

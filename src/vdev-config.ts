@@ -1,5 +1,5 @@
 
-import * as fs from 'fs-extra-plus';
+import * as fs from 'fs-extra';
 import * as Path from 'path';
 import { loadTemplatizedYaml } from './renderer';
 import deepmerge = require('deepmerge');

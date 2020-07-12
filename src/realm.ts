@@ -1,4 +1,5 @@
-import * as fs from 'fs-extra-plus';
+import { glob, saferRemove } from 'backlib';
+import * as fs from 'fs-extra';
 import * as Path from 'path';
 import { BaseObj } from './base';
 import { Block } from './block';
@@ -11,7 +12,6 @@ import { loadVdevConfig } from './vdev-config';
 
 
 // --------- Public Types --------- //
-
 export type RealmType = 'local' | 'gcp' | 'aws' | 'azure';
 export interface Realm extends BaseObj {
 
@@ -289,7 +289,7 @@ export async function loadRealms(rootDir?: string): Promise<RealmByName> {
 /** Get all of the resourceNames for a given realm */
 async function getAllConfigurationNames(realm: Realm): Promise<string[]> {
 	const dir = getRealmSrcDir(realm);
-	const yamlFiles = await fs.glob('*.yaml', dir);
+	const yamlFiles = await glob('*.yaml', dir);
 
 	// return the list of names only
 	if (yamlFiles) {
@@ -314,7 +314,7 @@ function getKFile(realm: Realm, kName: string) {
 }
 
 async function cleanRealmOutDir(realm: Realm) {
-	await fs.saferRemove(getRealmOutDir(realm));
+	await saferRemove(getRealmOutDir(realm));
 }
 // --------- /Private Helpers --------- //
 

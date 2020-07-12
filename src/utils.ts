@@ -1,4 +1,4 @@
-import * as fs from 'fs-extra-plus';
+import * as fs from 'fs-extra';
 import * as jsyaml from 'js-yaml';
 import { ParsedArgs } from 'minimist';
 import stripJsonComments from 'strip-json-comments';

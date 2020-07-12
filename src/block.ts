@@ -1,5 +1,6 @@
+import { glob, saferRemove } from 'backlib';
 import * as chokidar from 'chokidar';
-import * as fs from 'fs-extra-plus';
+import * as fs from 'fs-extra';
 import { spawn } from 'p-spawn';
 import * as Path from 'path';
 import { BaseObj } from './base';
@@ -96,7 +97,7 @@ export async function cleanNodeFiles() {
 		for (let fName of filesToDelete) {
 			const fileToDelete = Path.join(dir, fName);
 			if ((await fs.pathExists(fileToDelete))) {
-				await fs.saferRemove(fileToDelete);
+				await saferRemove(fileToDelete);
 			}
 		}
 	}
@@ -257,7 +258,7 @@ async function buildTsSrc(block: Block) {
 		outDir = (outDir) ? Path.join(block.dir, outDir, '/') : null; // add a ending '/' to normalize all of the dir path with ending / (join will remove duplicate)
 		if (outDir === distDir) {
 			console.log(`tsc prep - deleting tsc distDir ${distDir}`);
-			await fs.saferRemove(distDir);
+			await saferRemove(distDir);
 		} else {
 			console.log(`tss prep - skipping tsc distDir ${distDir} because does not match tsconfig.json compilerOptions.outDir ${outDir}`);
 		}
@@ -504,11 +505,11 @@ export async function loadBlock(name: string): Promise<Block> {
 /** Since 0.11.18 each string glob is sorted within their match, but if globs is an array, the order of each result glob result is preserved. */
 async function resolveGlobs(globs: string | string[]) {
 	if (typeof globs === 'string') {
-		return fs.glob(globs);
+		return glob(globs);
 	} else {
 		const lists: string[][] = [];
-		for (const glob of globs) {
-			const list = await fs.glob(glob);
+		for (const globStr of globs) {
+			const list = await glob(globStr);
 			lists.push(list);
 		}
 		return lists.flat();

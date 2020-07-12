@@ -1,4 +1,4 @@
-import * as fs from 'fs-extra-plus';
+import * as fs from 'fs-extra';
 import * as handlebars from 'handlebars';
 import { HelperOptions } from 'handlebars';
 import { userInfo } from 'os';

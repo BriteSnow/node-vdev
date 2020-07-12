@@ -1,4 +1,4 @@
-import * as fs from 'fs-extra-plus';
+import * as fs from 'fs-extra';
 import { spawn } from 'p-spawn';
 
 
@@ -97,9 +97,9 @@ export async function pgTest(pgOpts: PsqlOptions): Promise<PgTestResult> {
 	args.push("--command=SELECT version()");
 	const p = await spawn('psql', args, { env, capture: ['stdout', 'stderr'], ignoreFail: true });
 	if (p.code === 0) {
-		return { success: true, message: p.stdout.trim() };
+		return { success: true, message: p.stdout!.trim() };
 	} else {
-		const r: PgTestResult = { success: false, message: p.stdout };
+		const r: PgTestResult = { success: false, message: p.stdout! };
 		if (p.stderr) {
 			r.err = p.stderr.trim();
 		}
@@ -114,7 +114,7 @@ export async function pgStatus(pgOpts: PsqlOptions): Promise<PgStatusResult> {
 	//args.push('-q'); // for the quiet mode, we just need to result code
 	const p = await spawn('pg_isready', args, { env, ignoreFail: true, capture: ['stdout', 'stderr'] });
 	const code = p.code;
-	const message = p.stdout?.trim();
+	const message = p.stdout!.trim();
 	const accepting = (0 === p.code) ? true : false;
 	return { accepting, message, code };
 }
@@ -147,7 +147,7 @@ async function execPsql(pgOpts: PsqlOptions, args: string[]): Promise<{ stdout: 
 		stderr = itemErr ?? undefined;
 	}
 
-	return { stdout, stderr };
+	return { stdout: stdout ?? '', stderr: stderr ?? '' };
 }
 
 function buildSpawnOptions(pgOpts: PsqlOptions) {

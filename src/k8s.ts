@@ -1,8 +1,7 @@
-import { getConfigurationNames, renderRealmFile } from './realm';
-import { Realm } from './realm';
-import { asNames, prompt } from './utils';
 import { spawn } from 'p-spawn';
-import { GetPodResponse, PodItem, PodItemFilter, KPod, toKPod } from './k8s-types';
+import { GetPodResponse, KPod, PodItem, PodItemFilter, toKPod } from './k8s-types';
+import { getConfigurationNames, Realm, renderRealmFile } from './realm';
+import { asNames, prompt } from './utils';
 
 // --------- Public create/delete/logs/restart --------- //
 export async function kcreate(realm: Realm, resourceNames?: string | string[]) {
@@ -180,7 +179,7 @@ export async function getCurrentContext(): Promise<string | null> {
 		// console.log(`INFO: ${psResult.stderr}`);
 		return null;
 	} else {
-		return psResult.stdout.toString().trim() as string;
+		return psResult.stdout!.toString().trim() as string;
 	}
 
 }
@@ -206,7 +205,7 @@ async function fetchK8sObjectsByType(realm: Realm, type: string) {
 	const args = ['get', type, '-o', 'json'];
 	addNamespaceIfDefined(realm, args);
 	const psResult = await spawn('kubectl', args, { capture: 'stdout' });
-	const podsJsonStr = psResult.stdout.toString();
+	const podsJsonStr = psResult.stdout!.toString();
 	const response = JSON.parse(podsJsonStr) as GetPodResponse;
 	return response.items || [];
 }

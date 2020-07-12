@@ -1,6 +1,6 @@
 {
   "name": "vdev",
-  "version": "0.11.22",
+  "version": "0.12.0-SNAPSHOT-1",
   "description": "Kubernetes centric development utilities for high velocity development & deployment (Kubernetes, Docker, Node/TypeScript and web rollup/postcss/typescript).",
   "author": "Jeremy Chone <jeremy.chone@gmail.com>",
   "main": "dist/main.js",
@@ -12,36 +12,36 @@
   "dependencies": {
     "@rollup/plugin-commonjs": "^13.0.0",
     "@rollup/plugin-multi-entry": "^3.0.1",
-    "@rollup/plugin-node-resolve": "^8.0.1",
-    "@types/js-yaml": "^3.12.4",
+    "@rollup/plugin-node-resolve": "^8.1.0",
+    "@types/js-yaml": "^3.12.5",
     "@types/micromatch": "^4.0.1",
     "@types/minimist": "^1.2.0",
-    "autoprefixer": "^9.8.0",
+    "autoprefixer": "^9.8.5",
+    "backlib": "^0.2.0-SNAPSHOT-3",
     "chokidar": "^3.4.0",
     "cloud-bucket": "^0.3.3",
     "deepmerge": "^4.2.2",
-    "fast-glob": "^3.2.3",
-    "fs-extra-plus": "^0.5.18",
+    "fast-glob": "^3.2.4",
     "handlebars": "^4.7.6",
     "hbsp": "^0.3.9",
     "js-yaml": "^3.14.0",
     "micromatch": "^4.0.2",
     "minimist": "^1.2.3",
-    "p-spawn": "^0.5.1",
+    "p-spawn": "^0.5.3",
     "postcss": "^7.0.32",
     "postcss-import": "^12.0.1",
     "postcss-mixins": "^6.2.3",
-    "postcss-nested": "^4.2.1",
-    "rollup": "^2.16.1",
+    "postcss-nested": "^4.2.3",
+    "rollup": "^2.21.0",
     "rollup-plugin-typescript2": "^0.27.1",
-    "strip-json-comments": "^3.1.0",
-    "utils-min": "^0.1.13"
+    "strip-json-comments": "^3.1.1",
+    "utils-min": "^0.1.14"
   },
   "devDependencies": {
-    "@types/mocha": "^7.0.2",
+    "@types/mocha": "^8.0.0",
     "mocha": "^8.0.1",
     "ts-node": "^8.10.2",
-    "typescript": "^3.9.5"
+    "typescript": "^3.9.6"
   },
   "bin": {
     "vdev": "./dist/bin/bin-vdev.js"
