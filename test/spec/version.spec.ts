@@ -1,4 +1,4 @@
-import { updateVersions } from '../src/block';
+import { updateVersions } from '../../src/block';
 
 
 describe('version', async () => {

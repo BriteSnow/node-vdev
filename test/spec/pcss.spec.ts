@@ -1,6 +1,6 @@
 import { saferRemove } from 'backlib';
 import { mkdirp, stat } from 'fs-extra';
-import { pcssFiles } from '../src/processors';
+import { pcssFiles } from '../../src/processors';
 
 describe('pcss', async () => {
 

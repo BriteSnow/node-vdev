@@ -1,6 +1,6 @@
 {
   "name": "vdev",
-  "version": "0.12.0-SNAPSHOT-1",
+  "version": "0.12.0-SNAPSHOT-6",
   "description": "Kubernetes centric development utilities for high velocity development & deployment (Kubernetes, Docker, Node/TypeScript and web rollup/postcss/typescript).",
   "author": "Jeremy Chone <jeremy.chone@gmail.com>",
   "main": "dist/main.js",
@@ -10,14 +10,14 @@
     "url": "git://github.com/BriteSnow/node-vdev.git"
   },
   "dependencies": {
-    "@rollup/plugin-commonjs": "^13.0.0",
+    "@rollup/plugin-commonjs": "^13.0.1",
     "@rollup/plugin-multi-entry": "^3.0.1",
-    "@rollup/plugin-node-resolve": "^8.1.0",
+    "@rollup/plugin-node-resolve": "^8.4.0",
     "@types/js-yaml": "^3.12.5",
     "@types/micromatch": "^4.0.1",
     "@types/minimist": "^1.2.0",
     "autoprefixer": "^9.8.5",
-    "backlib": "^0.2.0-SNAPSHOT-3",
+    "backlib": "^0.2.0",
     "chokidar": "^3.4.0",
     "cloud-bucket": "^0.3.3",
     "deepmerge": "^4.2.2",
@@ -35,7 +35,7 @@
     "rollup": "^2.21.0",
     "rollup-plugin-typescript2": "^0.27.1",
     "strip-json-comments": "^3.1.1",
-    "utils-min": "^0.1.14"
+    "utils-min": "^0.1.15"
   },
   "devDependencies": {
     "@types/mocha": "^8.0.0",
@@ -47,8 +47,8 @@
     "vdev": "./dist/bin/bin-vdev.js"
   },
   "scripts": {
-    "test": "TS_NODE_FILES=true ./node_modules/.bin/mocha -p ./test/tsconfig.json ./test/*.spec.ts",
-    "testw": "TS_NODE_FILES=true ./node_modules/.bin/mocha -p ./test/tsconfig.json ./test/*.spec.ts --watch --watch-files './test/**/*.ts','./src/**/*.ts'",
+    "test": "TS_NODE_FILES=true ./node_modules/.bin/mocha",
+    "testw": "TS_NODE_FILES=true ./node_modules/.bin/mocha --watch",
     "prepare": "rm -Rf ./dist && ./node_modules/.bin/tsc",
     "testg": "./node_modules/.bin/mocha -g"
   },

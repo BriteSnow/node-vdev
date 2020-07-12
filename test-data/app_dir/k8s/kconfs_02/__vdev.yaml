@@ -2,5 +2,5 @@
 
 realms: 
   realm_02: 
-    yamlDir: kconfs_02/
+    yamlDir: k8s/kconfs_02/
     defaultConfigurations: ['srv2.yaml']

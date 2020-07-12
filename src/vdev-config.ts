@@ -9,7 +9,6 @@ import deepmerge = require('deepmerge');
 export interface RawVdevConfig {
 	system: string;
 	baseBlockDir: string;
-	k8sDir: string;
 	realms: { [name: string]: any };
 	blocks: (string | any)[];
 

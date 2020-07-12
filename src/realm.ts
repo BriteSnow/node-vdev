@@ -1,6 +1,7 @@
 import { glob, saferRemove } from 'backlib';
 import * as fs from 'fs-extra';
 import * as Path from 'path';
+import { asArray } from 'utils-min';
 import { BaseObj } from './base';
 import { Block } from './block';
 import { _getImageName } from './docker';
@@ -14,6 +15,9 @@ import { loadVdevConfig } from './vdev-config';
 // --------- Public Types --------- //
 export type RealmType = 'local' | 'gcp' | 'aws' | 'azure';
 export interface Realm extends BaseObj {
+
+	/** Path to the yaml directory(ies) relative to main vdev.yaml. If array, first take precedence and is the one used for the .out output result   */
+	yamlDirs: string[];
 
 	name: string;
 
@@ -112,7 +116,7 @@ export async function getCurrentRealm(check = true) {
 export async function renderRealmFile(realm: Realm, name: string): Promise<string> {
 	const realmOutDir = getRealmOutDir(realm);
 
-	const srcYamlFile = getKFile(realm, name);
+	const srcYamlFile = await findKFile(realm, name);
 	const srcYamlFileName = Path.parse(srcYamlFile).base;
 	const srcYamlContent = await fs.readFile(srcYamlFile, 'utf8');
 
@@ -223,7 +227,6 @@ export async function loadRealms(rootDir?: string): Promise<RealmByName> {
 
 	const base = {
 		system: rawConfig.system,
-		k8sDir: rawConfig.k8sDir
 	}
 	// get the _common variables and delete it from the realm list
 	let _common = {};
@@ -274,6 +277,9 @@ export async function loadRealms(rootDir?: string): Promise<RealmByName> {
 		// set the name
 		realm.name = name;
 
+		// set the yamlDirs from yamlDir
+		realm.yamlDirs = realm.yamlDirs ?? asArray(realm.yamlDir);
+
 		// Call hook to finish initializing the realm (i.e., realm type specific initialization)
 		// TODO: not sure this is the right place to init the current realm. This is loading the realm. 
 		await callHook(realm, 'realm_init');
@@ -288,29 +294,34 @@ export async function loadRealms(rootDir?: string): Promise<RealmByName> {
 // --------- Private Helpers --------- //
 /** Get all of the resourceNames for a given realm */
 async function getAllConfigurationNames(realm: Realm): Promise<string[]> {
-	const dir = getRealmSrcDir(realm);
-	const yamlFiles = await glob('*.yaml', dir);
 
-	// return the list of names only
-	if (yamlFiles) {
-		return yamlFiles.map((f: string) => { return Path.basename(f, '.yaml') });
-	} else {
-		return []; // return empty list if nothing found
+	const nameSet = new Set<string>();
+
+	for (const yamlDir of realm.yamlDirs) {
+		const yamlFiles = await glob('*.yaml', yamlDir);
+		yamlFiles.forEach(file => { nameSet.add(Path.basename(file, '.yaml')) })
 	}
+
+	return Array.from(nameSet);
 }
 
 function getRealmOutDir(realm: Realm) {
-	return Path.join(realm.k8sDir, '.out/', realm.name + '/');
+	return Path.join(realm.yamlDirs[0], '.out/', realm.name + '/');
 }
 
-function getRealmSrcDir(realm: Realm) {
-	return Path.join(realm.k8sDir, realm.yamlDir);
-}
+
 
 // get the Original Kubernets Yaml file (which could be a template)
-function getKFile(realm: Realm, kName: string) {
-	let k8sDir = getRealmSrcDir(realm);
-	return Path.join(k8sDir, `${kName.trim()}.yaml`);
+async function findKFile(realm: Realm, kName: string) {
+	const fileName = `${kName.trim()}.yaml`;
+	for (const yamlDir of realm.yamlDirs) {
+		const file = Path.join(yamlDir, fileName);
+		if (await fs.pathExists(file)) {
+			return file;
+		}
+	}
+
+	throw new Error(`Kubernetes resource file ${fileName} not found in directories ${realm.yamlDirs.join(', ')}`);
 }
 
 async function cleanRealmOutDir(realm: Realm) {

@@ -5,42 +5,15 @@ import { asNames, prompt } from './utils';
 
 // --------- Public create/delete/logs/restart --------- //
 export async function kcreate(realm: Realm, resourceNames?: string | string[]) {
-	const names = await getConfigurationNames(realm, resourceNames);
-
-	for (let name of names) {
-		const fileName = await renderRealmFile(realm, name);
-		try {
-			const args = ['create', '-f', fileName];
-			await spawn('kubectl', args);
-		} catch (ex) {
-			console.log(`Can't kcreate ${fileName}, skipping`);
-		}
-		console.log();
-	}
-
+	await kubectlFile(realm, 'create', resourceNames);
 }
 
 export async function kapply(realm: Realm, resourceNames?: string | string[]) {
-	const names = await getConfigurationNames(realm, resourceNames);
-
-	for (let name of names) {
-		const fileName = await renderRealmFile(realm, name);
-		try {
-			const args = ['apply', '-f', fileName];
-			addNamespaceIfDefined(realm, args);
-			await spawn('kubectl', args);
-		} catch (ex) {
-			console.log(`Can't kapply ${fileName}, skipping`);
-		}
-		console.log();
-	}
+	await kubectlFile(realm, 'apply', resourceNames);
 }
 
 // TODO: need to have a way to force the YES when use as API outside of cmd.
 export async function kdel(realm: Realm, resourceNames?: string | string[]) {
-	const names = await getConfigurationNames(realm, resourceNames);
-
-	// If flagged as prod, we do a 
 	if (realm.confirmOnDelete) {
 		const answer = await prompt("Do you really want to delete? (YES to continue)");
 		if (answer !== "YES") {
@@ -48,18 +21,7 @@ export async function kdel(realm: Realm, resourceNames?: string | string[]) {
 			return;
 		}
 	}
-
-	for (let kName of names) {
-		const fileName = await renderRealmFile(realm, kName);
-		const args = ['delete', '-f', fileName];
-		addNamespaceIfDefined(realm, args);
-		try {
-			await spawn('kubectl', args);
-		} catch (ex) {
-			console.log(`Can't kdelete ${kName}, skipping`);
-		}
-		console.log();
-	}
+	await kubectlFile(realm, 'delete', resourceNames);
 }
 
 let currentLogPodName: string | null = null;
@@ -193,6 +155,22 @@ export async function setCurrentContext(name: string) {
 
 
 // --------- Private Utils --------- //
+type KubectlAction = 'create' | 'apply' | 'delete';
+async function kubectlFile(realm: Realm, action: KubectlAction, resourceNames?: string | string[]) {
+	const names = await getConfigurationNames(realm, resourceNames);
+	for (let name of names) {
+		const fileName = await renderRealmFile(realm, name);
+		try {
+			const args = [action, '-f', fileName];
+			addNamespaceIfDefined(realm, args);
+			await spawn('kubectl', args);
+		} catch (ex) {
+			console.log(`Can't k${action} ${fileName}, skipping`);
+		}
+		console.log();
+	}
+}
+
 function addNamespaceIfDefined(realm: Realm, args: string[]) {
 	const namespace = realm.namespace;
 	if (namespace) {

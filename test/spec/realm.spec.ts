@@ -1,5 +1,5 @@
 import { deepEqual } from 'assert';
-import { loadRealms } from '../src/realm';
+import { loadRealms } from '../../src/realm';
 
 
 describe('realm', async () => {

@@ -2,7 +2,7 @@
 import { deepStrictEqual as equal } from 'assert';
 import { spawn } from 'p-spawn';
 import { wait } from 'utils-min';
-import { pgStatus, pgTest, psqlCommand, psqlImport } from '../src/psql';
+import { pgStatus, pgTest, psqlCommand, psqlImport } from '../../src/psql';
 
 const DB_CRED = {
 	host: 'localhost',
