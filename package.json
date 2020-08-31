@@ -1,6 +1,6 @@
 {
   "name": "vdev",
-  "version": "0.12.2",
+  "version": "0.12.3-SNAPSHOT",
   "description": "Kubernetes centric development utilities for high velocity development & deployment (Kubernetes, Docker, Node/TypeScript and web rollup/postcss/typescript).",
   "author": "Jeremy Chone <jeremy.chone@gmail.com>",
   "main": "dist/main.js",
@@ -19,7 +19,7 @@
     "autoprefixer": "^9.8.6",
     "backlib": "^0.2.1",
     "chokidar": "^3.4.2",
-    "cloud-bucket": "^0.3.5",
+    "cloud-bucket": "^0.3.6",
     "deepmerge": "^4.2.2",
     "fast-glob": "^3.2.4",
     "handlebars": "^4.7.6",

@@ -69,7 +69,7 @@ async function getBucketFromPathInfo(pathInfo: PathInfo): Promise<Bucket> {
 	if (rawCfg == null) {
 		throw new Error('VDEV ERROR - cannot find bucket ${pathInfo.store} in .vdev-buckets.yaml file');
 	}
-	return getBucket(rawCfg);
+	return getBucket({ ...rawCfg, log: true });
 
 }
 
@@ -83,7 +83,7 @@ async function loadRawBucketsConfig() {
 			break;
 		}
 	}
-	if (vdevBuckets == null) {
+	if (vdevBuckets != null) {
 		const confs = vdevBuckets.buckets;
 		// add the .name to each bucket info
 		for (let name in confs) {
