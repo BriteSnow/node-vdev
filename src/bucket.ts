@@ -1,4 +1,5 @@
 import { Bucket, getBucket } from 'cloud-bucket';
+import { pathExists } from 'fs-extra';
 import { loadYaml } from './utils';
 
 export type PathInfo = {
@@ -62,22 +63,34 @@ export function parsePathInfo(storeAndPathStr?: string) {
 // --------- Private Utils --------- //
 
 async function getBucketFromPathInfo(pathInfo: PathInfo): Promise<Bucket> {
-	const bucketCfgs = await loadRawConfig();
+	const bucketCfgs = await loadRawBucketsConfig();
 
-	// TODO: Needs to recognize the config from gcp vs aws (for now, assume gcp)
-	const rawCfg = bucketCfgs[pathInfo.store];
+	const rawCfg = bucketCfgs?.[pathInfo.store];
+	if (rawCfg == null) {
+		throw new Error('VDEV ERROR - cannot find bucket ${pathInfo.store} in .vdev-buckets.yaml file');
+	}
 	return getBucket(rawCfg);
 
 }
 
 
-async function loadRawConfig() {
-	let vdevBuckets: any = await loadYaml('vdev-buckets.yaml');
-	const confs = vdevBuckets.buckets;
-	// add the .name to each bucket info
-	for (let name in confs) {
-		confs[name].name = name;
+async function loadRawBucketsConfig() {
+	const files = ['.vdev-buckets.yaml', 'vdev-buckets.yaml'];
+	let vdevBuckets: any;
+	for (const file of files) {
+		if (await pathExists(file)) {
+			vdevBuckets = await loadYaml(file);
+			break;
+		}
 	}
-	return confs;
+	if (vdevBuckets == null) {
+		const confs = vdevBuckets.buckets;
+		// add the .name to each bucket info
+		for (let name in confs) {
+			confs[name].name = name;
+		}
+		return confs;
+	}
 }
+
 // --------- /Private Utils --------- //
