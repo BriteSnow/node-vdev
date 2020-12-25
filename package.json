@@ -1,7 +1,7 @@
 {
   "name": "vdev",
-  "version": "0.12.5",
-  "description": "Kubernetes centric development utilities for high velocity development & deployment (Kubernetes, Docker, Node/TypeScript and web rollup/postcss/typescript).",
+  "version": "0.12.6",
+  "description": "Kubernetes Drive Development (KDD) utilities for high velocity development & deployment (Kubernetes, Docker, Node/TypeScript and web rollup/postcss/typescript).",
   "author": "Jeremy Chone <jeremy.chone@gmail.com>",
   "main": "dist/main.js",
   "typings": "dist/types/main.d.ts",
