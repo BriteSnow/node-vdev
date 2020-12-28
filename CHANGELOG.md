@@ -1,3 +1,12 @@
+### [v0.13.0](https://github.com/BriteSnow/node-vdev/compare/v0.12.6...v0.13.0) 
+- `*+` builder - added builder extensible model. 
+- `+` rollup - added builder for rollup when `rollup.config.js` 
+- `+` pcss-cli - added builder for pcss-cli when `pcss.config.js` 
+
+### [v0.11.22...v0.12.06](https://github.com/BriteSnow/node-vdev/compare/v0.11.22...v0.12.6) 
+
+- `!` moved to awscli 2 for auto login
+- `.` dependencies updates.
 
 ### [v0.11.22](https://github.com/BriteSnow/node-vdev/compare/v0.11.3...v0.11.22) June 15th 2020
 

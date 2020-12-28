@@ -80,7 +80,7 @@ export async function printLog(txt: string, start: number, dist?: string | null)
 }
 
 export async function prompt(message: string) {
-	// console.log(`\n${message}: `);
+	// console.log(`\n${message}: `);n
 	process.stdout.write(`\n${message}: `);
 	return new Promise(function (resolve, reject) {
 		process.stdin.resume();

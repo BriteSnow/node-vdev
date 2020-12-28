@@ -1,12 +1,12 @@
-import { glob, saferRemove } from 'backlib';
-import * as chokidar from 'chokidar';
+import { saferRemove } from 'backlib';
 import * as fs from 'fs-extra';
-import { spawn } from 'p-spawn';
 import * as Path from 'path';
 import { BaseObj } from './base';
-import { pcssFiles, rollupFiles, tmplFiles } from './processors';
-import { asNames, now, Partial, printLog, readJsonFileWithComments } from './utils';
+import { getBuilders } from './builder';
+import { now, Partial, printLog } from './utils';
 import { loadVdevConfig } from './vdev-config';
+import { WebBundle } from './web-bundle-types';
+
 
 
 // --------- Public Types --------- //
@@ -19,21 +19,7 @@ export interface Block extends BaseObj {
 	[key: string]: any;
 }
 
-export interface WebBundle {
-	name: string;
-	/** The entries, support wild cards, to be compiled */
-	entries: string | string[];
 
-	/** To specify glob/files to watch in place of the entries (only used in watch mode, and not for .js/.ts) */
-	watch?: string | string[];
-
-	rollupOptions?: any;
-	dist: string; // distribution file path (from .dir)
-
-
-	type?: string; // set in the buildWebBundles
-	dir?: string; // set in the initWebBundle
-}
 
 export type BlockByName = { [name: string]: Block };
 // --------- /Public Types --------- //
@@ -111,7 +97,7 @@ export async function buildBlocksOrBundles(names: string[]) {
 	if (names.length === 0) {
 		const blocks = await loadBlocks();
 		for (let block of Object.values(blocks)) {
-			await _buildBlock(block);
+			await buildBlock(block);
 		}
 	} else {
 		for (let name of names) {
@@ -129,36 +115,7 @@ export async function watchBlock(blockName: string) {
 	const blocks = await loadBlocks();
 	const block = blocks[blockName];
 
-	const webBundles = (block) ? block.webBundles : null;
-	if (webBundles == null) {
-		throw new Error(`Block ${blockName} not found or does not have a '.webBundles'. As of now, can only watch webBundles`)
-	}
-
-	for (let bundle of webBundles) {
-		await initWebBundle(block, bundle);
-
-		// The rollup have a watch block, so we use it
-		if (bundle.type === 'js' || bundle.type === 'ts') {
-			if (bundle.watch) {
-				console.log(`WARNING - Ignoring '.watch' property for bundle ${bundle.name} for .js/.ts processing
-				as rollup watches dependencies. (advice: remove this .watch property for clarity)`);
-			}
-			await _buildBlock(block, bundle, { watch: true });
-		}
-
-		// Otherwise, we just watch the entries or the watch, and rebuild everything
-		else {
-			await _buildBlock(block, bundle);
-			const toWatch = bundle.watch ?? bundle.entries;
-			let watcher = chokidar.watch(toWatch, { persistent: true });
-			// TODO: Needs to use a call reducer
-			watcher.on('change', async function (filePath: string, stats) {
-				if (filePath.endsWith(`.${bundle.type}`)) {
-					await _buildBlock(block, bundle);
-				}
-			});
-		}
-	}
+	await buildBlock(block, { watch: true });
 }
 
 export interface BuildOptions {
@@ -174,255 +131,50 @@ const blockBuilt = new Set<string>();
  * @param blockName 
  * @param opts 
  */
-export async function buildBlock(blockName: string, opts?: BuildOptions) {
-	const blockByName = await loadBlocks();
-	const block = blockByName[blockName];
+export async function buildBlock(blockOrName: string | Block, opts?: BuildOptions) {
+	let block: Block;
 
+	//// get the bloxc
+	if (typeof blockOrName == 'string') {
+		const blockByNames = await loadBlocks();
+		block = blockByNames[blockOrName];
+		if (!block) {
+			throw new Error(`No block found for blockeName ${blockOrName}.`);
+		}
+	} else {
+		block = blockOrName;
+	}
+
+	//// if already built, skip
 	if (blockBuilt.has(block.name)) {
-		console.log(`------ Block ${block.name} already built - SKIP\n`);
+		console.log(`-------- Block ${block.name} already built - SKIP\n`);
 		return;
 	}
 
-	if (!block) {
-		throw new Error(`No block found for blockeName ${blockName}.`);
+	//// execute the build
+	console.log(`-------- Building Block ${block.name} ${block.dir}`);
+
+	const builders = await getBuilders(block);
+
+	const startBlock = now();
+	for (const builder of builders) {
+		const startBuilder = now();
+		console.log(`---- running builder ${builder.name}`);
+		await builder.build(block, opts?.watch);
+		await printLog(`---- running builder ${builder.name} DONE`, startBuilder);
+		console.log();
 	}
 
-	let bundle: WebBundle | undefined;
-	const onlyBundleName = opts?.onlyBundleName;
-	if (onlyBundleName && block.webBundles) {
-		bundle = block.webBundles.find((b) => (b.name == onlyBundleName));
-		if (!bundle) {
-			throw new Error(`No webBundle ${onlyBundleName} found in block ${block.name}`);
-		}
-		await initWebBundle(block, bundle);
-	}
+	await printLog(`-------- Building Block ${block.name} DONE`, startBlock);
+	console.log();
 
-	await _buildBlock(block, bundle, opts);
 	blockBuilt.add(block.name);
 }
 
-async function _buildBlock(block: Block, bundle?: WebBundle, opts?: BuildOptions) {
-
-	const hasPomXml = await fs.pathExists(Path.join(block.dir, 'pom.xml'));
-	const hasPackageJson = await fs.pathExists(Path.join(block.dir, 'package.json'));
-	const hasTsConfig = await fs.pathExists(Path.join(block.dir, 'tsconfig.json'));
-	const hasWebBundles = (block.webBundles) ? true : false;
-
-	// Note: if we have a bundleName, then, just the bundle log will be enough.
-	const start = now();
-	if (!bundle) {
-		console.log(`------ Building Block ${block.name} ${block.dir}`);
-	}
-
-	// no matter what, if we have a pckageJson, we make sure we do a npm install
-	if (hasPackageJson) {
-		await npmInstall(block);
-	}
-
-	// if we have a webBundles, we build it
-	if (hasWebBundles) {
-		// TODO: need to allow to give a bundle name to just build it
-		await buildWebBundles(block, bundle, opts);
-	}
-
-	// run tsc (with clean dist/ folder),  if it is not a webBundle (assume rollup will take care of the ts when webBundles)
-	if (!hasWebBundles && hasTsConfig) {
-		await buildTsSrc(block);
-	}
-
-	if (hasPomXml) {
-		await runMvn(block, opts ? opts.full : false);
-	}
-
-	if (!bundle) {
-		await printLog(`------ Building Block ${block.name} DONE`, start);
-		console.log();
-	}
-}
 
 
-async function npmInstall(block: Block) {
-	await spawn('npm', ['install'], { cwd: block.dir });
-}
-
-async function buildTsSrc(block: Block) {
-	const distDirNeedsDelete = false;
-
-	const distDir = Path.join(block.dir, '/dist/');
-	const distDirExist = await fs.pathExists(distDir);
-
-	// if we have distDirExist, check that it define as compileOptions.outDir in 
-	if (distDirExist) {
-		const tsconfigObj = await readJsonFileWithComments(Path.join(block.dir, 'tsconfig.json'));
-		let outDir = tsconfigObj.compilerOptions.outDir as string | undefined | null;
-		outDir = (outDir) ? Path.join(block.dir, outDir, '/') : null; // add a ending '/' to normalize all of the dir path with ending / (join will remove duplicate)
-		if (outDir === distDir) {
-			console.log(`tsc prep - deleting tsc distDir ${distDir}`);
-			await saferRemove(distDir);
-		} else {
-			console.log(`tss prep - skipping tsc distDir ${distDir} because does not match tsconfig.json compilerOptions.outDir ${outDir}`);
-		}
-	}
-
-	// Assume there is a typescript installed in the root project
-	await spawn('./node_modules/.bin/tsc', ['-p', block.dir]);
-}
-
-async function runMvn(block: Block, full?: boolean) {
-	const args = ['clean', 'package'];
-	if (!full) {
-		args.push('-Dmaven.test.skip=true');
-	}
-
-	var start = now();
-
-	await spawn('mvn', args, {
-		toConsole: false,
-		cwd: block.dir,
-		onStderr: function (data: any) {
-			process.stdout.write(data);
-		}
-	});
-
-	await printLog(`maven build ${full ? 'with test' : ''}`, start);
-}
 
 
-// --------- Private WebBundle Utils --------- //
-type WebBundler = (block: Block, webBundle: WebBundle, opts?: BuildOptions) => void;
-
-// bundlers by type (which is file extension without '.')
-const bundlers: { [type: string]: WebBundler } = {
-	ts: buildTsBundler,
-	pcss: buildPcssBundler,
-	tmpl: buildTmplBundler,
-	html: buildTmplBundler,
-	js: buildJsBundler
-}
-
-async function buildWebBundles(block: Block, onlyBundle?: WebBundle, opts?: BuildOptions) {
-
-	let webBundles: WebBundle[];
-
-	if (onlyBundle) {
-		// the onlyBundle is already initialized
-		webBundles = [onlyBundle];
-	} else {
-		webBundles = block.webBundles!;
-		// we need to initialize the webBundles
-		for (let bundle of webBundles) {
-			await initWebBundle(block, bundle);
-		}
-	}
-
-	for (let bundle of webBundles!) {
-		await ensureDist(bundle);
-		var start = now();
-		await bundlers[bundle.type!](block, bundle, opts);
-		if (opts?.watch) {
-			await printLog(`Starting watch mode for ${block.name}/${bundle.name} (${bundle.dist})`, start);
-		} else {
-			await printLog(`Building bundle ${block.name}/${bundle.name}`, start, bundle.dist);
-		}
-
-	}
-}
-
-const rollupOptionsDefaults = {
-	ts: {
-		watch: false,
-		ts: true,
-		tsconfig: './tsconfig.json'
-	},
-	js: {
-		watch: false,
-		ts: false
-	}
-}
-
-/**
- * Initialize all of the bundle properties accordingly. 
- * This allow the bundlers and other logic to not have to worry about default values and path resolution.
- */
-async function initWebBundle(block: Block, bundle: WebBundle) {
-
-	bundle.type = Path.extname(asNames(bundle.entries)[0]).substring(1);
-
-	// for now, just take the block.dir
-	bundle.dir = specialPathResolve('', block.dir, bundle.dir);
-
-	// Make the entries relative to the Block
-	bundle.entries = asNames(bundle.entries).map((f) => specialPathResolve('', bundle.dir!, f));
-
-	// If bundle.watch, same as entries above
-	if (bundle.watch) {
-		// Make the watch relative to the Block
-		bundle.watch = asNames(bundle.watch).map((f) => specialPathResolve('', bundle.dir!, f));
-	}
-
-	// resolve the dist
-	bundle.dist = specialPathResolve('', block.baseDistDir!, bundle.dist);
-
-
-	// --------- rollupOptions initialization --------- //
-	if (bundle.type === 'ts' || bundle.type === 'js') {
-		// get the base default options for this type
-		const rollupOptionsDefault = rollupOptionsDefaults[bundle.type];
-
-		// override default it if bundle has one
-		const rollupOptions = (bundle.rollupOptions) ? { ...rollupOptionsDefault, ...bundle.rollupOptions }
-			: { ...rollupOptionsDefault };
-
-		// resolve tsconfig
-		if (rollupOptions.tsconfig) {
-			rollupOptions.tsconfig = specialPathResolve('', bundle.dir, rollupOptions.tsconfig);
-		}
-
-		// set the new optoins back.
-		bundle.rollupOptions = rollupOptions;
-	}
-	// --------- /rollupOptions initialization --------- //
-
-}
-// --------- /Private WebBundle Utils --------- //
-
-// --------- Private Bundlers --------- //
-async function buildTsBundler(block: Block, bundle: WebBundle, opts?: BuildOptions) {
-	// TODO: need to re-enable watch
-	try {
-		if (opts && opts.watch) {
-			bundle.rollupOptions.watch = true;
-		}
-		// resolve all of the entries (with glob)
-		const allEntries = await resolveGlobs(bundle.entries);
-		await rollupFiles(allEntries, bundle.dist, bundle.rollupOptions);
-	} catch (ex) {
-		// TODO: need to move exception ahndle to the caller
-		console.log("BUILD ERROR - something when wrong on rollup\n\t", ex);
-		console.log("Empty string was save to the app bundle");
-		console.log("Trying saving again...");
-		return;
-	}
-}
-
-async function buildPcssBundler(block: Block, bundle: WebBundle, opts?: BuildOptions) {
-	const allEntries = await resolveGlobs(bundle.entries);
-	await pcssFiles(allEntries, bundle.dist);
-}
-
-async function buildTmplBundler(block: Block, bundle: WebBundle, opts?: BuildOptions) {
-	const allEntries = await resolveGlobs(bundle.entries);
-	await tmplFiles(allEntries, bundle.dist);
-}
-
-async function buildJsBundler(block: Block, bundle: WebBundle, opts?: BuildOptions) {
-	if (opts && opts.watch) {
-		bundle.rollupOptions.watch = true;
-	}
-	const allEntries = await resolveGlobs(bundle.entries);
-	await rollupFiles(allEntries, bundle.dist, bundle.rollupOptions);
-}
-// --------- /Private Bundlers --------- //
 
 // --------- Public Loaders --------- //
 export async function loadDockerBlocks(): Promise<BlockByName> {
@@ -500,24 +252,6 @@ export async function loadBlock(name: string): Promise<Block> {
 
 // --------- /Public Loaders --------- //
 
-// --------- Private Utils --------- //
-
-/** Since 0.11.18 each string glob is sorted within their match, but if globs is an array, the order of each result glob result is preserved. */
-async function resolveGlobs(globs: string | string[]) {
-	if (typeof globs === 'string') {
-		return glob(globs);
-	} else {
-		const lists: string[][] = [];
-		for (const globStr of globs) {
-			const list = await glob(globStr);
-			lists.push(list);
-		}
-		return lists.flat();
-	}
-
-}
-
-
 //#region    ---------- version Utils ---------- 
 
 /** Return the first version found. For html, looks for the `src|href=....?v=___` and for other files the version = ... */
@@ -555,32 +289,5 @@ function replaceVersion(content: string, value: string, isHtml = false) {
 
 //#endregion ---------- /version Utils ---------- 
 
-async function ensureDist(bundle: WebBundle) {
-	const distDir = Path.dirname(bundle.dist);
-	await fs.ensureDir(distDir);
-}
 
-/**
- * Special resolve that 
- *   - if finalPath null, then, return dir. 
- *   - resolve any path to dir if it starts with './' or '../', 
- *   - absolute path if it starts with '/' 
- *   - baseDir if the path does not start with either '/' or './'
- * @param baseDir 
- * @param dir
- * @param finalPath dir or file path
- */
-export function specialPathResolve(baseDir: string, dir: string, finalPath?: string): string {
-	if (finalPath == null) {
-		return dir;
-	}
-
-	if (finalPath.startsWith('/')) {
-		return finalPath;
-	}
-	if (finalPath.startsWith('./') || finalPath.startsWith('../')) {
-		return Path.join(dir, finalPath)
-	}
-	return Path.join(baseDir, finalPath);
-}
 // --------- /Private Utils --------- //

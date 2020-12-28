@@ -1,6 +1,6 @@
 import { saferRemove } from 'backlib';
 import { stat } from 'fs-extra';
-import { rollupFiles } from '../../src/processors';
+import { rollupFiles } from '../../src/builder-web-bundlers-processors';
 
 describe('rollup', async () => {
 
