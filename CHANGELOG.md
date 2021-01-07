@@ -1,4 +1,10 @@
+
+### [v0.13.1](https://github.com/BriteSnow/node-vdev/compare/v0.13.0...v0.13.1) 
+
+- `-` watch - fix watch mode for builder rollup/pcss-cli/hbs-ccli
+
 ### [v0.13.0](https://github.com/BriteSnow/node-vdev/compare/v0.12.6...v0.13.0) 
+
 - `*+` builder - added builder extensible model. 
 - `+` rollup - added builder for rollup when `rollup.config.js` 
 - `+` pcss-cli - added builder for pcss-cli when `pcss.config.js` 
