@@ -64,7 +64,8 @@ registerBuilder({
 		const bin = Path.join(nodeModuleDir, '.bin/rollup');
 		const args = ['-c'];
 		if (watch) args.push('-w');
-		await spawn(bin, args, { cwd: block.dir });
+		const pproc = spawn(bin, args, { cwd: block.dir });
+		if (!watch) await pproc;
 	}
 });
 //#endregion ---------- /builder - rollup - 'rollup.config.js' ----------
@@ -82,7 +83,8 @@ registerBuilder({
 		const bin = Path.join(nodeModuleDir, '.bin/pcss');
 		const args = [];
 		if (watch) args.push('-w');
-		await spawn(bin, args, { cwd: block.dir });
+		const pproc = spawn(bin, args, { cwd: block.dir });
+		if (!watch) await pproc;
 	}
 });
 //#endregion ---------- /builder - pcss - 'pcss.config.js' ----------
@@ -100,7 +102,8 @@ registerBuilder({
 		const bin = Path.join(nodeModuleDir, '.bin/hbs');
 		const args = [];
 		if (watch) args.push('-w');
-		await spawn(bin, args, { cwd: block.dir });
+		const pproc = spawn(bin, args, { cwd: block.dir });
+		if (!watch) await pproc;
 	}
 });
 //#endregion ---------- /builder - hbs - 'hbs.config.js' ----------
