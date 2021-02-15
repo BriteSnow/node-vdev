@@ -74,8 +74,13 @@ describe('psql', async function () {
 // --------- Private Utils --------- //
 async function setupPgImage(this: any) {
 	this.timeout(5000);
-	await spawn('docker', ['run', '--rm', '-d', '-p', '5432:5432', '-e', 'POSTGRES_PASSWORD=postgres', '--name', 'vdev-pg', 'postgres:12'], { capture: 'stdout' });
-	await wait(3000);
+	try {
+		await spawn('docker', ['stop', 'vdev-pg'], { capture: 'stdout', ignoreFail: true });
+	} catch (ex) { }
+
+	const args = ['run', '--rm', '-d', '-p', '5432:5432', '-e', 'POSTGRES_PASSWORD=postgres', '--name', 'vdev-pg', 'postgres:12'];
+	await spawn('docker', args, { capture: 'stdout' });
+	await wait(1000);
 }
 async function closePgImage() {
 	await wait(500);
