@@ -46,7 +46,18 @@ registerBuilder({
 		}
 
 		// Assume there is a typescript installed in the root project
-		await spawn('./node_modules/.bin/tsc', ['-p', block.dir]);
+		const args = ['-p', block.dir];
+		await spawn('./node_modules/.bin/tsc', args);
+
+		//// Enhancement, support watch for tsc vdev watch... project
+		////  	- cons: will need to know what to call on update (for example, restart.sh is app specific)
+		////    - prop: Perhaps, have this part of a hook on watch, a notify (would need a vdev.js or some sort)
+		// if (watch){
+		// 	const watchTscPromise = spawn('./node_modules/.bin/tsc', [...args, '-w']);
+		// } else {
+		// 	await spawn('./node_modules/.bin/tsc', args);
+		// }
+
 	}
 });
 //#endregion ---------- /builder - tsc - 'tsconfig.json' ---------- 
