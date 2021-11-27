@@ -1,7 +1,7 @@
 import { ParsedArgs } from 'minimist';
 import { formatAsTable, getCurrentRealm, loadRealms, setRealm } from '../main';
-import { CmdMap } from '../utils';
 import { Realm } from '../realm';
+import { CmdMap } from '../utils';
 
 
 export const cmds: CmdMap = {
@@ -15,7 +15,7 @@ async function realm(argv: ParsedArgs) {
 	let currentRealm: Realm | undefined;
 	try {
 		currentRealm = await getCurrentRealm();
-	} catch (ex) {
+	} catch (ex: any) {
 		// if we have name, thi sis a set realm, so just set the warning and continue to set
 		if (name) {
 			console.log(`WARNING - ${ex.message}`);

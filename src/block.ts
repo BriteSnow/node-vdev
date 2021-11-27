@@ -60,7 +60,7 @@ export async function updateVersions(config?: any) {
 				// Note: for now, we do not log when nothing to do.
 			}
 		}
-	} catch (ex) {
+	} catch (ex: any) {
 		throw new Error(`ERROR while doing versioning files - ${ex.message}`);
 	}
 	// if we have at least one update, we close the log section.

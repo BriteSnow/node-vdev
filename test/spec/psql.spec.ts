@@ -60,7 +60,7 @@ describe('psql', async function () {
 		try {
 			const r = await psqlImport({ ...DB_CRED, ...{ toConsole: false } }, [sqlFile]);
 			equal(r[0].file, sqlFile, 'r[0].file');
-		} catch (ex) {
+		} catch (ex: any) {
 			equal(ex.items.length, 1);
 			equal(ex.message.includes('already exists'), true);
 		}
